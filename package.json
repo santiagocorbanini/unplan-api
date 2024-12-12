@@ -1,0 +1,12 @@
+{
+    "name": "un-plan-api",
+    "private": true,
+    "scripts": {
+        "start:api": "npm --prefix api run dev",
+        "start:front": "npm --prefix front run dev",
+        "start": "concurrently \"npm run start:api\" \"npm run start:front\""
+    },
+    "devDependencies": {
+        "concurrently": "^8.2.2"
+    }
+}
