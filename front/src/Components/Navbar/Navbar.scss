@@ -1,0 +1,17 @@
+.navbar {
+    background-color: black;
+}
+
+.text-nav {
+    font-size: .9em;
+    font-weight: 200;
+}
+
+@media (max-width: 992px) {
+    .col-1 {
+        justify-content: center;
+    }
+    .col-3 {
+        justify-content: center;
+    }
+  }

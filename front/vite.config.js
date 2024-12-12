@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      "/api": "http://localhost:4000",
+      "/shows": "http://localhost:4000", // Proxy para todas las rutas /shows
     },
   },
 });

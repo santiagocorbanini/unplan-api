@@ -1,0 +1,29 @@
+.form {
+    font-size: .8em;
+}
+
+.main-container-login {
+    height: 70vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-control {
+    background-color: rgb(226, 226, 226) !important;
+    font-size: 1em !important;
+}
+
+.form-control::placeholder {
+    font-size: 1em;
+  }
+
+.label {
+    font-size: 1.2em;
+    font-weight: 500;
+}
+
+.card-body {
+    background-color: black;
+}

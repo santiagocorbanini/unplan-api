@@ -1,0 +1,25 @@
+body {
+    background-color: black;
+}
+
+.button-custom {
+    background-color: #fff;
+    border-color: #000;
+    color: #000;
+    cursor: pointer;
+    font-size: 14px;
+    letter-spacing: 2px;
+    margin-bottom: 5px;
+    margin-top: 20px;
+    overflow: hidden;
+    padding: 8px 18px;
+    position: relative;
+    text-transform: uppercase;
+}
+
+.button-custom:hover {
+    background-color: transparent;
+    border: 1px solid #fff;
+    color: #fff;
+    transition: all .4s ease-in-out;
+}
