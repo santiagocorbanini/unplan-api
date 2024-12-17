@@ -2,19 +2,20 @@ import { app } from "../../firebaseConfig/firebase";
 import { getAuth, signOut } from "firebase/auth";
 import { Button, Container, Row, Col } from "react-bootstrap";
 import "./Navbar.scss";
+import logo from "../../assets/unplan-logo.png";
 
 const auth = getAuth(app);
 
 const Navbar = ({ usuario }) => {
     return (
-        <Container className="navbar">
+        <Container fluid className="navbar">
             <Row className="w-100">
                 <Col lg={4} md={12} xs={12} className="col-1 d-flex">
                     <a href="https://trtproducciones.com/" target="_blank">
                         <img
-                            width={126}
+                            width={56}
                             className="img-fluid p-2 mx-auto d-block"
-                            src="./../../assets/unplan-logo.png"
+                            src={logo}
                             role="img"
                             alt="UnPlanLogo"
                             aria-label="Ir al sitio Un Plan en Junín en una nueva ventana"
