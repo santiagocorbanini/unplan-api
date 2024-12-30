@@ -11,7 +11,7 @@ const Navbar = ({ usuario }) => {
         <Container fluid className="navbar">
             <Row className="w-100">
                 <Col lg={4} md={12} xs={12} className="col-1 d-flex">
-                    <a href="https://trtproducciones.com/" target="_blank">
+                    <a target="_blank">
                         <img
                             width={56}
                             className="img-fluid p-2 mx-auto d-block"
@@ -28,9 +28,6 @@ const Navbar = ({ usuario }) => {
                     md={12}
                     className="d-flex justify-content-around align-items-center col-2"
                 >
-                    <span className="text-white text-center mx-auto text-nav">
-                        Bienvenido: {usuario}
-                    </span>
                 </Col>
                 <Col
                     lg={4}
@@ -38,7 +35,10 @@ const Navbar = ({ usuario }) => {
                     md={12}
                     className="d-flex justify-content-end align-items-center col-3"
                 >
-                    <Button className="button-custom m-0" onClick={() => signOut(auth)}>
+                    <span className="text-white text-center mx-auto text-nav">
+                        Bienvenido: {usuario}
+                    </span>
+                    <Button className="button-custom mt-1" onClick={() => signOut(auth)}>
                         Salir
                     </Button>
                 </Col>

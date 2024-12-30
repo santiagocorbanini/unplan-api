@@ -40,7 +40,7 @@ const Auth = () => {
                         className="login-left-side d-flex align-items-center justify-content-center"
                         lg={6}
                     >
-                        <a href="https://trtproducciones.com/" target="_blank">
+                        <a target="_blank">
                             <img
                                 width={350}
                                 className="img-fluid p-2 mx-auto d-block"
