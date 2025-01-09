@@ -100,7 +100,7 @@ const ModalAgregar = ({ showModal, toggleModal, getShows }) => {
                                 className="text-danger"
                             />
                         </div>
-                        {/* city */}
+                        {/* city 
                         <div className="form-group">
                             <label className="mb-1" htmlFor="city">
                                 Ciudad
@@ -118,6 +118,7 @@ const ModalAgregar = ({ showModal, toggleModal, getShows }) => {
                                 className="text-danger"
                             />
                         </div>
+                        */}
                         {/* venue */}
                         <div className="form-group">
                             <label className="mb-1" htmlFor="venue">
@@ -171,7 +172,7 @@ const ModalAgregar = ({ showModal, toggleModal, getShows }) => {
                                 className="text-danger"
                             />
                         </div>
-                        {/* start_date */}
+                        {/* start_date 
                         <div className="form-group">
                             <label className="mb-1" htmlFor="startDate">
                                 Visible desde
@@ -187,8 +188,8 @@ const ModalAgregar = ({ showModal, toggleModal, getShows }) => {
                                 component="div"
                                 className="text-danger"
                             />
-                        </div>
-                        {/* end_date */}
+                        </div> */}
+                        {/* end_date 
                         <div className="form-group">
                             <label className="mb-1" htmlFor="endDate">
                                 Visible hasta
@@ -204,7 +205,7 @@ const ModalAgregar = ({ showModal, toggleModal, getShows }) => {
                                 component="div"
                                 className="text-danger"
                             />
-                        </div>
+                        </div> */}
                         {/* image */}
                         <div className="form-group">
                             <label className="mb-1" htmlFor="image">

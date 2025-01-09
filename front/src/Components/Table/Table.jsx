@@ -88,10 +88,10 @@ const TableShows = () => {
                             <th scope="col">ID</th>
                             <th scope="col">Evento</th>
                             <th scope="col">Fecha</th>
-                            <th scope="col">Ciudad</th>
+                            {/* <th scope="col">Ciudad</th> */}
                             <th scope="col">Lugar</th>
-                            <th scope="col">📅 Desde</th>
-                            <th scope="col">📅 Hasta</th>
+                            {/* <th scope="col">📅 Desde</th> */}
+                            {/* <th scope="col">📅 Hasta</th> */}
                             <th scope="col">URL</th>
                             <th scope="col">Imagen</th>
                             <th scope="col" className="text-center">
@@ -108,16 +108,16 @@ const TableShows = () => {
                                     {show.event_date &&
                                         format(new Date(show.event_date), "dd/MM/yyyy")}
                                 </td>
-                                <td style={{ verticalAlign: "middle" }}>{show.city}</td>
+                                {/* <td style={{ verticalAlign: "middle" }}>{show.city}</td> */}
                                 <td style={{ verticalAlign: "middle" }}>{show.venue}</td>
-                                <td style={{ verticalAlign: "middle" }}>
+                                {/* <td style={{ verticalAlign: "middle" }}>
                                     {show.event_date &&
                                         format(new Date(show.start_date), "dd/MM/yyyy HH:mm")}
-                                </td>
-                                <td style={{ verticalAlign: "middle" }}>
+                                </td> */}
+                                {/* <td style={{ verticalAlign: "middle" }}>
                                     {show.event_date &&
                                         format(new Date(show.end_date), "dd/MM/yyyy HH:mm")}
-                                </td>
+                                </td> */}
                                 <td style={{ verticalAlign: "middle" }}>
                                     {show.url && (
                                         <>

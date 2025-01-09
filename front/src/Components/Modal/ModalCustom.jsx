@@ -146,7 +146,7 @@ const ModalCustom = ({ showModal, toggleModal, getShows, selectedEvent }) => {
                                     className="text-danger"
                                 />
                             </div>
-                            {/* city */}
+                            {/* city 
                             <div className="form-group">
                                 <label className="mb-1" htmlFor="city">
                                     Ciudad
@@ -164,6 +164,7 @@ const ModalCustom = ({ showModal, toggleModal, getShows, selectedEvent }) => {
                                     className="text-danger"
                                 />
                             </div>
+                            */}
                             {/* venue */}
                             <div className="form-group">
                                 <label className="mb-1" htmlFor="venue">
@@ -217,7 +218,7 @@ const ModalCustom = ({ showModal, toggleModal, getShows, selectedEvent }) => {
                                     className="text-danger"
                                 />
                             </div>
-                            {/* start_date */}
+                            {/* start_date 
                             <div className="form-group">
                                 <label className="mb-1" htmlFor="start_date">
                                     Visible desde
@@ -233,8 +234,8 @@ const ModalCustom = ({ showModal, toggleModal, getShows, selectedEvent }) => {
                                     component="div"
                                     className="text-danger"
                                 />
-                            </div>
-                            {/* end_date */}
+                            </div> */}
+                            {/* end_date 
                             <div className="form-group">
                                 <label className="mb-1" htmlFor="end_date">
                                     Visible hasta
@@ -250,7 +251,7 @@ const ModalCustom = ({ showModal, toggleModal, getShows, selectedEvent }) => {
                                     component="div"
                                     className="text-danger"
                                 />
-                            </div>
+                            </div> */}
                             {/* flyer */}
                             <div className="form-group">
                                 <label className="mb-1" htmlFor="flyer">
