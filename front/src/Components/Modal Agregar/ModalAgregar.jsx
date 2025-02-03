@@ -1,37 +1,43 @@
-import { useState } from "react"
+import { useState } from "react";
 import {
     Modal,
     ModalHeader,
     ModalBody,
     ModalFooter,
     Button,
-} from "react-bootstrap"
-import { FileUploader } from "react-drag-drop-files"
-import { Formik, Form, Field, ErrorMessage } from "formik"
-import * as Yup from "yup"
-import axios from "axios"
-import Swal from "sweetalert2"
+} from "react-bootstrap";
+import { FileUploader } from "react-drag-drop-files";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+import Swal from "sweetalert2";
 import { createShow } from "../../services/shows.js";
 
 const ModalAgregar = ({ showModal, toggleModal, getShows }) => {
     const validationSchema = Yup.object().shape({
-        name: Yup.string().required("El nombre es obligatorio"),
-        start_date: Yup.date().required("La fecha de inicio es obligatoria"),
-        end_date: Yup.date().required("La fecha de fin es obligatoria"),
+        title: Yup.string().required("El nombre es obligatorio"),
+        event_date: Yup.date().required("La fecha del evento es obligatoria"),
         image: Yup.mixed(),
-        end_date: Yup.date().min(
-            Yup.ref("start_date"),
-            "La fecha de finalización debe ser posterior a la de inicio"
-        ),
-    })
+    });
 
-    const fileTypes = ["JPG", "JPEG"]
+    const fileTypes = ["JPG", "JPEG"];
+    const [file, setFile] = useState(null);
+    const [categories, setCategories] = useState([]); // Estado para las categorías
 
-    const [file, setFile] = useState(null)
+    const handleCategoryChange = (category) => {
+        setCategories((prevCategories) =>
+            prevCategories.includes(category)
+                ? prevCategories.filter((c) => c !== category) // Quitar si ya está seleccionado
+                : [...prevCategories, category] // Agregar si no está seleccionado
+        );
+    };
 
     const handleSubmit = async (values) => {
         try {
-            await createShow(values);
+            const showData = {
+                ...values,
+                categories, // Agregar categorías seleccionadas
+            };
+            await createShow(showData);
             Swal.fire({
                 title: "Evento agregado",
                 text: "El evento se ha agregado correctamente.",
@@ -49,17 +55,16 @@ const ModalAgregar = ({ showModal, toggleModal, getShows }) => {
     };
 
     const handleChange = (file) => {
-        // Validar el tamaño del archivo -- MAX 1MB --
         if (file.size > 1048576) {
             Swal.fire({
                 title: "Error",
                 text: "La imagen debe tener un tamaño de hasta 1MB.",
                 icon: "error",
-            })
+            });
         } else {
-            setFile(file)
+            setFile(file);
         }
-    }
+    };
 
     return (
         <Modal show={showModal} onHide={toggleModal} centered>
@@ -70,12 +75,9 @@ const ModalAgregar = ({ showModal, toggleModal, getShows }) => {
                 <Formik
                     initialValues={{
                         title: "",
-                        city: "",
                         venue: "",
                         url: "",
                         event_date: "",
-                        start_date: "",
-                        end_date: "",
                         image: "",
                     }}
                     validationSchema={validationSchema}
@@ -100,25 +102,6 @@ const ModalAgregar = ({ showModal, toggleModal, getShows }) => {
                                 className="text-danger"
                             />
                         </div>
-                        {/* city 
-                        <div className="form-group">
-                            <label className="mb-1" htmlFor="city">
-                                Ciudad
-                            </label>
-                            <Field
-                                placeholder="Ingrese el nombre de la ciudad"
-                                type="text"
-                                id="city"
-                                name="city"
-                                className="form-control mb-2"
-                            />
-                            <ErrorMessage
-                                name="city"
-                                component="div"
-                                className="text-danger"
-                            />
-                        </div>
-                        */}
                         {/* venue */}
                         <div className="form-group">
                             <label className="mb-1" htmlFor="venue">
@@ -143,7 +126,7 @@ const ModalAgregar = ({ showModal, toggleModal, getShows }) => {
                                 URL
                             </label>
                             <Field
-                                placeholder="Ingrese la url de entradas"
+                                placeholder="Ingrese la URL de entradas"
                                 type="text"
                                 id="url"
                                 name="url"
@@ -167,45 +150,37 @@ const ModalAgregar = ({ showModal, toggleModal, getShows }) => {
                                 className="form-control mb-2"
                             />
                             <ErrorMessage
-                                name="dateEvent"
+                                name="event_date"
                                 component="div"
                                 className="text-danger"
                             />
                         </div>
-                        {/* start_date 
+                        {/* categories */}
                         <div className="form-group">
-                            <label className="mb-1" htmlFor="startDate">
-                                Visible desde
-                            </label>
-                            <Field
-                                type="datetime-local"
-                                id="start_date"
-                                name="start_date"
-                                className="form-control mb-2"
-                            />
-                            <ErrorMessage
-                                name="start_date"
-                                component="div"
-                                className="text-danger"
-                            />
-                        </div> */}
-                        {/* end_date 
-                        <div className="form-group">
-                            <label className="mb-1" htmlFor="endDate">
-                                Visible hasta
-                            </label>
-                            <Field
-                                type="datetime-local"
-                                id="end_date"
-                                name="end_date"
-                                className="form-control mb-2"
-                            />
-                            <ErrorMessage
-                                name="end_date"
-                                component="div"
-                                className="text-danger"
-                            />
-                        </div> */}
+                            <label className="mb-1">Categorías</label>
+                            <div className="d-flex gap-2">
+                                <Button
+                                    variant={
+                                        categories.includes("Aire Libre")
+                                            ? "primary"
+                                            : "outline-primary"
+                                    }
+                                    onClick={() => handleCategoryChange("Aire Libre")}
+                                >
+                                    Aire Libre
+                                </Button>
+                                <Button
+                                    variant={
+                                        categories.includes("Teatro")
+                                            ? "primary"
+                                            : "outline-primary"
+                                    }
+                                    onClick={() => handleCategoryChange("Teatro")}
+                                >
+                                    Teatro
+                                </Button>
+                            </div>
+                        </div>
                         {/* image */}
                         <div className="form-group">
                             <label className="mb-1" htmlFor="image">
@@ -245,7 +220,7 @@ const ModalAgregar = ({ showModal, toggleModal, getShows }) => {
                 </Formik>
             </ModalBody>
         </Modal>
-    )
-}
+    );
+};
 
-export default ModalAgregar
+export default ModalAgregar;

@@ -14,9 +14,9 @@ const TableShows = () => {
     const [showName, setShowName] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState(null);
-
     const [isAddModalOpen, setIsAddModalOpen] = useState(false); // Estado para el modal de agregar evento
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
     const getShows = async () => {
         try {
             const response = await getAllShows();
@@ -87,11 +87,9 @@ const TableShows = () => {
                         <tr>
                             <th scope="col">ID</th>
                             <th scope="col">Evento</th>
+                            <th scope="col">Categoría</th>
                             <th scope="col">Fecha</th>
-                            {/* <th scope="col">Ciudad</th> */}
                             <th scope="col">Lugar</th>
-                            {/* <th scope="col">📅 Desde</th> */}
-                            {/* <th scope="col">📅 Hasta</th> */}
                             <th scope="col">URL</th>
                             <th scope="col">Imagen</th>
                             <th scope="col" className="text-center">
@@ -105,19 +103,13 @@ const TableShows = () => {
                                 <td style={{ verticalAlign: "middle" }}>{show.show_id}</td>
                                 <td style={{ verticalAlign: "middle" }}>{show.title}</td>
                                 <td style={{ verticalAlign: "middle" }}>
+                                    {Array.isArray(show.categories) ? show.categories.join(", ") : ""}
+                                </td>
+                                <td style={{ verticalAlign: "middle" }}>
                                     {show.event_date &&
                                         format(new Date(show.event_date), "dd/MM/yyyy")}
                                 </td>
-                                {/* <td style={{ verticalAlign: "middle" }}>{show.city}</td> */}
                                 <td style={{ verticalAlign: "middle" }}>{show.venue}</td>
-                                {/* <td style={{ verticalAlign: "middle" }}>
-                                    {show.event_date &&
-                                        format(new Date(show.start_date), "dd/MM/yyyy HH:mm")}
-                                </td> */}
-                                {/* <td style={{ verticalAlign: "middle" }}>
-                                    {show.event_date &&
-                                        format(new Date(show.end_date), "dd/MM/yyyy HH:mm")}
-                                </td> */}
                                 <td style={{ verticalAlign: "middle" }}>
                                     {show.url && (
                                         <>

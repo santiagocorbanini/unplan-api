@@ -1,7 +1,9 @@
 import { pool } from "../database/connection.js";
 
 const findAll = async () => {
-  const { rows } = await pool.query("SELECT * FROM shows order by show_id asc");
+  const { rows } = await pool.query(
+    "SELECT * FROM shows order by event_date asc"
+  );
   return rows;
 };
 
@@ -56,10 +58,9 @@ const createShow = async (body) => {
     event_date = null,
     city,
     url,
-    end_date = null,
-    start_date = null,
     completedevent,
     flyer,
+    categories = [],
   } = body;
 
   try {
@@ -77,8 +78,8 @@ const createShow = async (body) => {
     }
 
     const query = `
-            INSERT INTO shows (title, venue, event_date, city, url, end_date, start_date, completedevent, flyer)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`;
+            INSERT INTO shows (title, venue, event_date, city, url, completedevent, flyer, categories)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`;
 
     // Utiliza null para las fechas si no se proporcionan
     const values = [
@@ -87,10 +88,9 @@ const createShow = async (body) => {
       event_date || null,
       city,
       url,
-      end_date || null,
-      start_date || null,
       completedevent,
       flyerBuffer,
+      categories,
     ];
 
     const { rows } = await pool.query(query, values);
@@ -104,23 +104,13 @@ const createShow = async (body) => {
 const updateShow = async (show_id, newData) => {
   console.log("santi", newData);
   try {
-    const { title, venue, city, url, flyer, event_date, start_date, end_date } =
-      newData;
+    const { title, venue, city, url, flyer, event_date, categories } = newData;
     let query =
-      "UPDATE shows SET title = $2, venue = $3, city = $4, url = $5, event_date = $6, start_date = $7, end_date = $8";
-    const values = [
-      show_id,
-      title,
-      venue,
-      city,
-      url,
-      event_date,
-      start_date,
-      end_date,
-    ];
+      "UPDATE shows SET title = $2, venue = $3, city = $4, url = $5, event_date = $6, categories = $7";
+    const values = [show_id, title, venue, city, url, event_date, categories];
 
     if (Buffer.isBuffer(flyer)) {
-      query += ", flyer = $9";
+      query += ", flyer = $8";
       values.push(flyer);
     }
 

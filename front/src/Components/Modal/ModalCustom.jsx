@@ -33,6 +33,13 @@ const ModalCustom = ({ showModal, toggleModal, getShows, selectedEvent }) => {
     };
 
     const handleSubmit = async (values) => {
+        console.log(values.categories);
+        const newCategories = values.categories
+            ? `{${values.categories.split(",").map(item => item.trim()).join(",")}}`
+            : null;
+        // Luego pasarlo a tu API
+        console.log(newCategories);
+        values.categories = newCategories
         console.log(values);
         try {
             if (isEditMode) {
@@ -120,9 +127,8 @@ const ModalCustom = ({ showModal, toggleModal, getShows, selectedEvent }) => {
                         venue: selectedEvent?.venue || "",
                         url: selectedEvent?.url || "",
                         event_date: selectedEvent?.event_date ? formatDate(selectedEvent.event_date) : "",
-                        start_date: selectedEvent?.start_date ? formatDateTime(selectedEvent.start_date) : "",
-                        end_date: selectedEvent?.end_date ? formatDateTime(selectedEvent.end_date) : "",
-                        flyer: selectedEvent?.flyer || "", // Asegúrate de ajustar el campo de la imagen según la estructura de datos esperada
+                        flyer: selectedEvent?.flyer || "",
+                        categories: selectedEvent?.categories || "",
                     }}
                     onSubmit={handleSubmit}
                 >
@@ -252,6 +258,23 @@ const ModalCustom = ({ showModal, toggleModal, getShows, selectedEvent }) => {
                                     className="text-danger"
                                 />
                             </div> */}
+                            <div className="form-group">
+                                <label className="mb-1" htmlFor="categories">
+                                    Categorías
+                                </label>
+                                <Field
+                                    placeholder="Ingrese las categorías separadas por comas"
+                                    type="text"
+                                    id="categories"
+                                    name="categories"
+                                    className="form-control mb-2"
+                                />
+                                <ErrorMessage
+                                    name="categories"
+                                    component="div"
+                                    className="text-danger"
+                                />
+                            </div>
                             {/* flyer */}
                             <div className="form-group">
                                 <label className="mb-1" htmlFor="flyer">

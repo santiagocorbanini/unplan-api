@@ -15,3 +15,6 @@ SELECT * from SHOWS
 
 ALTER TABLE shows
 ALTER COLUMN flyer TYPE BYTEA USING flyer::bytea;
+
+ALTER TABLE shows
+ADD COLUMN categories VARCHAR(255)[];
