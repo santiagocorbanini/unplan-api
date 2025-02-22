@@ -56,3 +56,9 @@ PGPORT=5432
 ```
 VITE_APP_API_URL='http://localhost:5004'
 ```
+
+## 🚀 **Comandos para iniciar el proyecto:**
+```
+npm install
+npm run dev/start (dependiendo si te pocionas en / o /api)
+```
