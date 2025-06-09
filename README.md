@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Proyecto UnplanDB
 
 Este proyecto requiere la creación de una base de datos llamada `unplandb` con una tabla `shows` para gestionar eventos. A continuación se detallan los pasos para configurarla correctamente.
@@ -63,8 +62,5 @@ VITE_APP_API_URL='http://localhost:5004'
 npm install
 npm run dev/start (dependiendo si te pocionas en / o /api)
 ```
-=======
-# unplan-api
 
 brew services start postgresql@14
->>>>>>> 58121ba (agrego categorias un plan)
