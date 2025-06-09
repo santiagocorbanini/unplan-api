@@ -157,7 +157,7 @@ const ModalAgregar = ({ showModal, toggleModal, getShows }) => {
                         </div>
                         {/* categories */}
                         <div className="form-group">
-                            <label className="mb-1">Categorías</label>
+                            <label className="mb-1">Categorías2</label>
                             <div className="d-flex gap-2">
                                 <Button
                                     variant={

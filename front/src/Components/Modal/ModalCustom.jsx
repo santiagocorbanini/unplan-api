@@ -13,6 +13,16 @@ import { createShow, updateShow } from "../../services/shows.js";
 const ModalCustom = ({ showModal, toggleModal, getShows, selectedEvent }) => {
     const isEditMode = !!selectedEvent;
 
+    const categoryOptions = [
+        "Evento",
+        "Gastronomía",
+        "Música",
+        "Teatro",
+        "Feria",
+        "Gratis",
+        "Aire Libre",
+    ];
+
     const formatDateTime = (date) => {
         if (!date) return "";
         const d = new Date(date);
@@ -33,18 +43,22 @@ const ModalCustom = ({ showModal, toggleModal, getShows, selectedEvent }) => {
     };
 
     const handleSubmit = async (values) => {
-        console.log(values.categories);
-        const newCategories = values.categories
-            ? `{${values.categories.split(",").map(item => item.trim()).join(",")}}`
-            : null;
+        console.log("entro con estas categorias:", values.categories);
+        //const newCategories = values.categories
+        //    ? `{${values.categories.split(",").map(item => item.trim()).join(",")}}`
+        //    : null;
         // Luego pasarlo a tu API
-        console.log(newCategories);
-        values.categories = newCategories
-        console.log(values);
+
+        //values.categories = newCategories
+
+        const payload = {
+            ...values,
+            categories: `{${values.categories.join(",")}}`, // convierte a formato {Música,Teatro}
+        };
         try {
             if (isEditMode) {
                 // Llamar a updateShow
-                await updateShow(selectedEvent.show_id, values);
+                await updateShow(selectedEvent.show_id, payload);
                 Swal.fire({
                     title: "Evento editado",
                     text: "El evento se ha editado correctamente.",
@@ -52,7 +66,7 @@ const ModalCustom = ({ showModal, toggleModal, getShows, selectedEvent }) => {
                 });
             } else {
                 // Llamar a createShow
-                await createShow(values);
+                await createShow(payload);
                 Swal.fire({
                     title: "Evento agregado",
                     text: "El evento se ha agregado correctamente.",
@@ -128,7 +142,7 @@ const ModalCustom = ({ showModal, toggleModal, getShows, selectedEvent }) => {
                         url: selectedEvent?.url || "",
                         event_date: selectedEvent?.event_date ? formatDate(selectedEvent.event_date) : "",
                         flyer: selectedEvent?.flyer || "",
-                        categories: selectedEvent?.categories || "",
+                        categories: selectedEvent?.categories || [],
                     }}
                     onSubmit={handleSubmit}
                 >
@@ -262,13 +276,42 @@ const ModalCustom = ({ showModal, toggleModal, getShows, selectedEvent }) => {
                                 <label className="mb-1" htmlFor="categories">
                                     Categorías
                                 </label>
-                                <Field
-                                    placeholder="Ingrese las categorías separadas por comas"
-                                    type="text"
-                                    id="categories"
-                                    name="categories"
-                                    className="form-control mb-2"
-                                />
+                                <div className="form-group">
+                                    <label className="mb-1">Categorías</label>
+                                    <div className="d-flex flex-wrap gap-2">
+                                        {categoryOptions.map((category) => (
+                                            <div key={category} className="form-check">
+                                                <input
+                                                    type="checkbox"
+                                                    id={category}
+                                                    name="categories"
+                                                    value={category}
+                                                    checked={formikProps.values.categories.includes(category)}
+                                                    onChange={(e) => {
+                                                        const { checked, value } = e.target;
+                                                        if (checked) {
+                                                            formikProps.setFieldValue("categories", [
+                                                                ...formikProps.values.categories,
+                                                                value,
+                                                            ]);
+                                                        } else {
+                                                            formikProps.setFieldValue(
+                                                                "categories",
+                                                                formikProps.values.categories.filter((c) => c !== value)
+                                                            );
+                                                        }
+                                                    }}
+                                                    className="form-check-input"
+                                                />
+                                                <label htmlFor={category} className="form-check-label ms-1">
+                                                    {category}
+                                                </label>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <ErrorMessage name="categories" component="div" className="text-danger" />
+                                </div>
+
                                 <ErrorMessage
                                     name="categories"
                                     component="div"

@@ -11,7 +11,7 @@ completedevent BOOLEAN DEFAULT(FALSE),
 flyer VARCHAR(255)
 );
 
-SELECT * from SHOWS
+SELECT * from SHOWS;
 
 ALTER TABLE shows
 ALTER COLUMN flyer TYPE BYTEA USING flyer::bytea;

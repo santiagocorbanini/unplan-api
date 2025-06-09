@@ -6,6 +6,7 @@ import { Formik, ErrorMessage, Field } from "formik";
 import * as Yup from "yup";
 import Swal from "sweetalert2";
 import "./Auth.scss";
+import unplanLogo from '../../assets/unplan-logo.png';
 
 const auth = getAuth(app);
 
@@ -32,8 +33,8 @@ const Auth = () => {
     });
 
     return (
-        <>
-            <h1 className="text-center text-white mt-5">Login</h1>
+        <div className="card-body">
+            <h1 className="text-center text-grey mt-5">Login</h1>
             <Container className="main-container-login">
                 <Row className="g-0 w-100">
                     <Col
@@ -44,7 +45,7 @@ const Auth = () => {
                             <img
                                 width={350}
                                 className="img-fluid p-2 mx-auto d-block"
-                                src="./../../assets/unplan-logo.png"
+                                src={unplanLogo}
                                 role="img"
                                 alt="UnPlanLogo"
                                 aria-label="Ir al sitio Un Plan en Junín en una nueva ventana"
@@ -62,7 +63,7 @@ const Auth = () => {
                                     {({ handleSubmit, handleChange, values }) => (
                                         <Form onSubmit={handleSubmit} className="form p-3">
                                             <Form.Group controlId="email">
-                                                <Form.Label className="label text-white text-uppercase">
+                                                <Form.Label className="label text-grey text-uppercase">
                                                     Correo electrónico:
                                                 </Form.Label>
                                                 <Field
@@ -80,7 +81,7 @@ const Auth = () => {
                                             </Form.Group>
 
                                             <Form.Group controlId="password">
-                                                <Form.Label className="label text-white text-uppercase">
+                                                <Form.Label className="label text-grey text-uppercase">
                                                     Contraseña:
                                                 </Form.Label>
                                                 <Field
@@ -112,7 +113,7 @@ const Auth = () => {
                     </Col>
                 </Row>
             </Container>
-        </>
+        </div>
     );
 };
 

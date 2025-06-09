@@ -7,6 +7,8 @@ Currently, two official plugins are available:
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
 - [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-VITE_APP_API_URL='http://localhost:5001'
+VITE_APP_API_URL='http://localhost:5004'
 VITE_APP_API_URL='http://149.50.146.27:3126'
 VITE_APP_API_URL='http://149.50.146.27:3127'
+
+VITE_APP_API_URL='https://api.pampacode.com'

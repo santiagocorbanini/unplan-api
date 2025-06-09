@@ -2,7 +2,7 @@ import { app } from "../../firebaseConfig/firebase";
 import { getAuth, signOut } from "firebase/auth";
 import { Button, Container, Row, Col } from "react-bootstrap";
 import "./Navbar.scss";
-import logo from "../../assets/unplan-logo.png";
+import logo from "./../../assets/unplan-logo.png";
 
 const auth = getAuth(app);
 
