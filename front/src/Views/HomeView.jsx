@@ -16,7 +16,7 @@ const HomeView = () => {
     return (
         <Container fluid className="w-100 p-0 main-content">
             <Navbar usuario={parsedUser.email} />
-            <h1 className="text-center text-white">Administrador</h1>
+            <h1 className="text-center text-black">Administrador</h1>
             <TableShows />
         </Container>
     );

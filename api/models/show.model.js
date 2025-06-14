@@ -52,84 +52,126 @@ const getShowById = async (show_id) => {
 };
 
 const createShow = async (body) => {
-  const {
-    title,
-    venue,
-    event_date = null,
-    city,
-    url,
-    completedevent,
-    flyer,
-    categories = [],
-  } = body;
-
-  try {
-    let flyerBuffer = null;
-
-    // Si el flyer ya es un buffer, úsalo directamente
-    if (Buffer.isBuffer(flyer)) {
-      flyerBuffer = flyer;
-    } else if (
-      flyer &&
-      typeof flyer === "string" &&
-      flyer.startsWith("data:image")
-    ) {
-      flyerBuffer = Buffer.from(flyer.split(",")[1], "base64");
-    }
-
-    const query = `
-            INSERT INTO shows (title, venue, event_date, city, url, completedevent, flyer, categories)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`;
-
-    // Utiliza null para las fechas si no se proporcionan
-    const values = [
+    const {
       title,
       venue,
-      event_date || null,
+      event_date = null,
       city,
       url,
       completedevent,
-      flyerBuffer,
+      flyer,
       categories,
-    ];
-
-    const { rows } = await pool.query(query, values);
-    return rows[0];
-  } catch (error) {
-    console.error("Error al crear el espectáculo:", error);
-    throw error;
-  }
-};
-
+      instagram = null,
+      web = null,
+      address = null,
+    } = body;
+  
+    try {
+      let flyerBuffer = null;
+  
+      if (Buffer.isBuffer(flyer)) {
+        flyerBuffer = flyer;
+      } else if (
+        flyer &&
+        typeof flyer === "string" &&
+        flyer.startsWith("data:image")
+      ) {
+        flyerBuffer = Buffer.from(flyer.split(",")[1], "base64");
+      } else {
+        throw new Error("Formato de flyer inválido");
+      }
+  
+      const query = `
+        INSERT INTO shows (
+          title, venue, event_date, city, url, completedevent,
+          flyer, categories, instagram, web, address
+        )
+        VALUES ($1, $2, $3, $4, $5, $6,
+                $7, $8, $9, $10, $11)
+        RETURNING *`;
+  
+      const values = [
+        title,
+        venue,
+        event_date,
+        city,
+        url,
+        completedevent,
+        flyerBuffer,
+        categories,
+        instagram,
+        web,
+        address,
+      ];
+  
+      const { rows } = await pool.query(query, values);
+      return rows[0];
+    } catch (error) {
+      console.error("Error al crear el espectáculo:", error);
+      throw error;
+    }
+  };
+  
 const updateShow = async (show_id, newData) => {
-  console.log("santi", newData);
-  try {
-    const { title, venue, city, url, flyer, event_date, categories } = newData;
-    let query =
-      "UPDATE shows SET title = $2, venue = $3, city = $4, url = $5, event_date = $6, categories = $7";
-    const values = [show_id, title, venue, city, url, event_date, categories];
-
-    if (Buffer.isBuffer(flyer)) {
-      query += ", flyer = $8";
-      values.push(flyer);
+    const {
+      title,
+      venue,
+      city,
+      url,
+      flyer,
+      event_date,
+      categories,
+      instagram,
+      web,
+      address,
+    } = newData;
+  
+  
+    try {
+      let query = `
+        UPDATE shows SET
+          title = $2,
+          venue = $3,
+          city = $4,
+          url = $5,
+          event_date = $6,
+          categories = $7,
+          instagram = $8,
+          web = $9,
+          address = $10`;
+  
+      const values = [
+        show_id,
+        title,
+        venue,
+        city,
+        url,
+        event_date,
+        categories,
+        instagram,
+        web,
+        address,
+      ];
+  
+      if (Buffer.isBuffer(flyer)) {
+        query += `, flyer = $11`;
+        values.push(flyerBuffer);
+      }
+  
+      query += " WHERE show_id = $1 RETURNING *";
+  
+      const { rows } = await pool.query(query, values);
+  
+      if (rows.length === 0) {
+        throw new Error("No se encontró ningún espectáculo con el ID especificado");
+      }
+  
+      return rows[0];
+    } catch (error) {
+      console.error("Error al actualizar el espectáculo:", error);
+      throw error;
     }
-
-    query += " WHERE show_id = $1 RETURNING *";
-
-    const { rows } = await pool.query(query, values);
-
-    if (rows.length === 0) {
-      throw new Error(
-        "No se encontró ningún espectáculo con el ID especificado"
-      );
-    }
-
-    return rows[0];
-  } catch (error) {
-    console.error("Error al actualizar el espectáculo:", error);
-    throw error;
-  }
-};
+  };
 
 export const showModel = {
   findAll,

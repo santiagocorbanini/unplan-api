@@ -44,7 +44,7 @@ ADD COLUMN categories VARCHAR(255)[];
 
 ## 🛠️ **Configuración del archivo en api `.env`:**
 ```
-PORT=5004
+PORT=5047
 PGUSER="postgres"
 PGHOST="localhost"
 PGPASSWORD="root"
@@ -54,7 +54,7 @@ PGPORT=5432
 
 ## 🛠️ **Configuración del archivo en front `.env`:**
 ```
-VITE_APP_API_URL='http://localhost:5004'
+VITE_APP_API_URL='http://localhost:5047'
 ```
 
 ## 🚀 **Comandos para iniciar el proyecto:**

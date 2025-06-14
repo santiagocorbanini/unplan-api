@@ -21,13 +21,13 @@ const ModalAgregar = ({ showModal, toggleModal, getShows }) => {
 
     const fileTypes = ["JPG", "JPEG"];
     const [file, setFile] = useState(null);
-    const [categories, setCategories] = useState([]); // Estado para las categorías
+    const [categories, setCategories] = useState([]);
 
     const handleCategoryChange = (category) => {
         setCategories((prevCategories) =>
             prevCategories.includes(category)
-                ? prevCategories.filter((c) => c !== category) // Quitar si ya está seleccionado
-                : [...prevCategories, category] // Agregar si no está seleccionado
+                ? prevCategories.filter((c) => c !== category)
+                : [...prevCategories, category]
         );
     };
 
@@ -35,8 +35,15 @@ const ModalAgregar = ({ showModal, toggleModal, getShows }) => {
         try {
             const showData = {
                 ...values,
-                categories, // Agregar categorías seleccionadas
+                categories: `{${categories.join(",")}}`, // Formato correcto para PostgreSQL array
+                address: values.address || null, // Manejo explícito de campos opcionales
+                instagram: values.instagram || null,
+                web: values.web || null,
+                image: file // Asegurar que la imagen se incluya
             };
+
+            console.log("Datos a enviar:", showData); // Para depuración
+
             await createShow(showData);
             Swal.fire({
                 title: "Evento agregado",
@@ -46,6 +53,7 @@ const ModalAgregar = ({ showModal, toggleModal, getShows }) => {
             toggleModal();
             getShows();
         } catch (error) {
+            console.error("Error al crear el evento:", error);
             Swal.fire({
                 title: "Error",
                 text: "No se pudo agregar el evento.",
@@ -79,144 +87,198 @@ const ModalAgregar = ({ showModal, toggleModal, getShows }) => {
                         url: "",
                         event_date: "",
                         image: "",
+                        address: "",
+                        instagram: "",
+                        web: ""
                     }}
                     validationSchema={validationSchema}
                     onSubmit={handleSubmit}
                 >
-                    <Form>
-                        {/* title */}
-                        <div className="form-group">
-                            <label className="mb-1" htmlFor="title">
-                                Evento
-                            </label>
-                            <Field
-                                placeholder="Ingrese el nombre del evento"
-                                type="text"
-                                id="title"
-                                name="title"
-                                className="form-control mb-2"
-                            />
-                            <ErrorMessage
-                                name="title"
-                                component="div"
-                                className="text-danger"
-                            />
-                        </div>
-                        {/* venue */}
-                        <div className="form-group">
-                            <label className="mb-1" htmlFor="venue">
-                                Lugar
-                            </label>
-                            <Field
-                                placeholder="Ingrese el nombre del lugar"
-                                type="text"
-                                id="venue"
-                                name="venue"
-                                className="form-control mb-2"
-                            />
-                            <ErrorMessage
-                                name="venue"
-                                component="div"
-                                className="text-danger"
-                            />
-                        </div>
-                        {/* url */}
-                        <div className="form-group">
-                            <label className="mb-1" htmlFor="url">
-                                URL
-                            </label>
-                            <Field
-                                placeholder="Ingrese la URL de entradas"
-                                type="text"
-                                id="url"
-                                name="url"
-                                className="form-control mb-2"
-                            />
-                            <ErrorMessage
-                                name="url"
-                                component="div"
-                                className="text-danger"
-                            />
-                        </div>
-                        {/* event_date */}
-                        <div className="form-group">
-                            <label className="mb-1" htmlFor="event_date">
-                                Fecha del Evento
-                            </label>
-                            <Field
-                                type="date"
-                                id="event_date"
-                                name="event_date"
-                                className="form-control mb-2"
-                            />
-                            <ErrorMessage
-                                name="event_date"
-                                component="div"
-                                className="text-danger"
-                            />
-                        </div>
-                        {/* categories */}
-                        <div className="form-group">
-                            <label className="mb-1">Categorías2</label>
-                            <div className="d-flex gap-2">
-                                <Button
-                                    variant={
-                                        categories.includes("Aire Libre")
-                                            ? "primary"
-                                            : "outline-primary"
-                                    }
-                                    onClick={() => handleCategoryChange("Aire Libre")}
-                                >
-                                    Aire Libre
-                                </Button>
-                                <Button
-                                    variant={
-                                        categories.includes("Teatro")
-                                            ? "primary"
-                                            : "outline-primary"
-                                    }
-                                    onClick={() => handleCategoryChange("Teatro")}
-                                >
-                                    Teatro
-                                </Button>
+                    {({ values }) => (
+                        <Form>
+                            {/* title */}
+                            <div className="form-group">
+                                <label className="mb-1" htmlFor="title">
+                                    Evento
+                                </label>
+                                <Field
+                                    placeholder="Ingrese el nombre del evento"
+                                    type="text"
+                                    id="title"
+                                    name="title"
+                                    className="form-control mb-2"
+                                />
+                                <ErrorMessage
+                                    name="title"
+                                    component="div"
+                                    className="text-danger"
+                                />
                             </div>
-                        </div>
-                        {/* image */}
-                        <div className="form-group">
-                            <label className="mb-1" htmlFor="image">
-                                Flyer
-                            </label>
-                            <FileUploader
-                                handleChange={handleChange}
-                                name="image"
-                                types={fileTypes}
-                                multiple={false}
-                                label="Arrastre o suba una imagen"
-                                hoverTitle="Arrastre aquí"
-                            />
-                            <ErrorMessage
-                                name="image"
-                                component="div"
-                                className="text-danger"
-                            />
-                        </div>
-                        <ModalFooter className="d-flex gap-2 justify-content-center">
-                            <Button
-                                style={{ width: "40%" }}
-                                variant="secondary"
-                                onClick={toggleModal}
-                            >
-                                Cancelar
-                            </Button>
-                            <Button
-                                style={{ width: "40%" }}
-                                variant="primary"
-                                type="submit"
-                            >
-                                Agregar
-                            </Button>
-                        </ModalFooter>
-                    </Form>
+
+                            {/* venue */}
+                            <div className="form-group">
+                                <label className="mb-1" htmlFor="venue">
+                                    Lugar
+                                </label>
+                                <Field
+                                    placeholder="Ingrese el nombre del lugar"
+                                    type="text"
+                                    id="venue"
+                                    name="venue"
+                                    className="form-control mb-2"
+                                />
+                                <ErrorMessage
+                                    name="venue"
+                                    component="div"
+                                    className="text-danger"
+                                />
+                            </div>
+
+                            {/* address */}
+                            <div className="form-group">
+                                <label className="mb-1" htmlFor="address">
+                                    Dirección
+                                </label>
+                                <Field
+                                    placeholder="Ingrese la dirección del evento"
+                                    type="text"
+                                    id="address"
+                                    name="address"
+                                    className="form-control mb-2"
+                                />
+                            </div>
+
+                            {/* url */}
+                            <div className="form-group">
+                                <label className="mb-1" htmlFor="url">
+                                    URL de entradas
+                                </label>
+                                <Field
+                                    placeholder="Ingrese la URL de entradas"
+                                    type="text"
+                                    id="url"
+                                    name="url"
+                                    className="form-control mb-2"
+                                />
+                                <ErrorMessage
+                                    name="url"
+                                    component="div"
+                                    className="text-danger"
+                                />
+                            </div>
+
+                            {/* instagram */}
+                            <div className="form-group">
+                                <label className="mb-1" htmlFor="instagram">
+                                    Instagram
+                                </label>
+                                <Field
+                                    placeholder="Ingrese el usuario de Instagram"
+                                    type="text"
+                                    id="instagram"
+                                    name="instagram"
+                                    className="form-control mb-2"
+                                />
+                            </div>
+
+                            {/* web */}
+                            <div className="form-group">
+                                <label className="mb-1" htmlFor="web">
+                                    Sitio web
+                                </label>
+                                <Field
+                                    placeholder="Ingrese la URL del sitio web"
+                                    type="text"
+                                    id="web"
+                                    name="web"
+                                    className="form-control mb-2"
+                                />
+                            </div>
+
+                            {/* event_date */}
+                            <div className="form-group">
+                                <label className="mb-1" htmlFor="event_date">
+                                    Fecha del Evento
+                                </label>
+                                <Field
+                                    type="date"
+                                    id="event_date"
+                                    name="event_date"
+                                    className="form-control mb-2"
+                                />
+                                <ErrorMessage
+                                    name="event_date"
+                                    component="div"
+                                    className="text-danger"
+                                />
+                            </div>
+
+                            {/* categories */}
+                            <div className="form-group">
+                                <label className="mb-1">Categorías</label>
+                                <div className="d-flex gap-2">
+                                    <Button
+                                        variant={
+                                            categories.includes("Aire Libre")
+                                                ? "primary"
+                                                : "outline-primary"
+                                        }
+                                        onClick={() => handleCategoryChange("Aire Libre")}
+                                    >
+                                        Aire Libre
+                                    </Button>
+                                    <Button
+                                        variant={
+                                            categories.includes("Teatro")
+                                                ? "primary"
+                                                : "outline-primary"
+                                        }
+                                        onClick={() => handleCategoryChange("Teatro")}
+                                    >
+                                        Teatro
+                                    </Button>
+                                    {/* Agrega más categorías según necesites */}
+                                </div>
+                            </div>
+
+                            {/* image */}
+                            <div className="form-group">
+                                <label className="mb-1" htmlFor="image">
+                                    Flyer
+                                </label>
+                                <FileUploader
+                                    handleChange={handleChange}
+                                    name="image"
+                                    types={fileTypes}
+                                    multiple={false}
+                                    label="Arrastre o suba una imagen"
+                                    hoverTitle="Arrastre aquí"
+                                />
+                                <ErrorMessage
+                                    name="image"
+                                    component="div"
+                                    className="text-danger"
+                                />
+                            </div>
+
+                            <ModalFooter className="d-flex gap-2 justify-content-center">
+                                <Button
+                                    style={{ width: "40%" }}
+                                    variant="secondary"
+                                    onClick={toggleModal}
+                                >
+                                    Cancelar
+                                </Button>
+                                <Button
+                                    style={{ width: "40%" }}
+                                    variant="primary"
+                                    type="submit"
+                                >
+                                    Agregar
+                                </Button>
+                            </ModalFooter>
+                        </Form>
+                    )}
                 </Formik>
             </ModalBody>
         </Modal>

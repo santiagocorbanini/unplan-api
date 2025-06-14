@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Button, Container, Table, Modal } from "react-bootstrap";
-import { FaCopy } from "react-icons/fa"; // Importar el ícono de copiar
+import { FaCopy, FaInstagram, FaGlobe, FaMapMarkerAlt, FaEdit, FaTrash, FaTag } from "react-icons/fa";
 import Swal from "sweetalert2";
 import axios from "axios";
 import { format } from "date-fns";
@@ -14,7 +14,7 @@ const TableShows = () => {
     const [showName, setShowName] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState(null);
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false); // Estado para el modal de agregar evento
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     const getShows = async () => {
@@ -86,12 +86,15 @@ const TableShows = () => {
                     <thead>
                         <tr>
                             <th scope="col">ID</th>
-                            <th scope="col">Evento</th>
-                            <th scope="col">Categoría</th>
-                            <th scope="col">Fecha</th>
-                            <th scope="col">Lugar</th>
-                            <th scope="col">URL</th>
-                            <th scope="col">Imagen</th>
+                            <th scope="col">Imagen*</th>
+                            <th scope="col">Evento*</th>
+                            <th scope="col">Categoría*</th>
+                            <th scope="col">Fecha*</th>
+                            <th scope="col">Lugar*</th>
+                            <th scope="col"><FaMapMarkerAlt className="me-2" />Dir</th>
+                            <th scope="col">Insta</th>
+                            <th scope="col">Web</th>
+                            <th scope="col">Ticket</th>
                             <th scope="col" className="text-center">
                                 Acciones
                             </th>
@@ -101,39 +104,6 @@ const TableShows = () => {
                         {shows.map((show, index) => (
                             <tr key={index}>
                                 <td style={{ verticalAlign: "middle" }}>{show.show_id}</td>
-                                <td style={{ verticalAlign: "middle" }}>{show.title}</td>
-                                <td style={{ verticalAlign: "middle" }}>
-                                    {Array.isArray(show.categories) ? show.categories.join(", ") : ""}
-                                </td>
-                                <td style={{ verticalAlign: "middle" }}>
-                                    {show.event_date &&
-                                        format(new Date(show.event_date), "dd/MM/yyyy")}
-                                </td>
-                                <td style={{ verticalAlign: "middle" }}>{show.venue}</td>
-                                <td style={{ verticalAlign: "middle" }}>
-                                    {show.url && (
-                                        <>
-                                            <span title={show.url}>
-                                                {show.url.length > 15
-                                                    ? `${show.url.slice(0, 15)}...`
-                                                    : show.url}
-                                            </span>
-                                            <FaCopy
-                                                className="copy-icon"
-                                                onClick={() => {
-                                                    navigator.clipboard.writeText(show.url);
-                                                    Swal.fire({
-                                                        title: "URL Copiada",
-                                                        text: "La URL se ha copiado al portapapeles",
-                                                        icon: "success",
-                                                        timer: 1500,
-                                                        showConfirmButton: false,
-                                                    });
-                                                }}
-                                            />
-                                        </>
-                                    )}
-                                </td>
                                 <td style={{ verticalAlign: "middle", textAlign: "center" }}>
                                     {show.flyer?.data ? (
                                         <img
@@ -141,31 +111,103 @@ const TableShows = () => {
                                                 new Uint8Array(show.flyer.data).reduce((data, byte) => data + String.fromCharCode(byte), "")
                                             )}`}
                                             alt="Flyer"
-                                            width={100}
+                                            width={50}
                                         />
                                     ) : (
                                         <span>Sin imagen</span>
                                     )}
                                 </td>
+                                <td style={{ verticalAlign: "middle" }}>{show.title}</td>
+                                <td style={{ verticalAlign: "middle" }}>
+                                    {Array.isArray(show.categories) && show.categories.length > 0 ? (
+                                        <div className="d-flex align-items-center">
+                                            <span title={show.categories.join(", ")}>
+                                                {show.categories.join(", ").length > 15
+                                                    ? `${show.categories.join(", ").slice(0, 15)}...`
+                                                    : show.categories.join(", ")}
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        ""
+                                    )}
+                                </td>
+                                <td style={{ verticalAlign: "middle" }}>
+                                    {show.event_date &&
+                                        format(new Date(show.event_date), "dd/MM/yyyy")}
+                                </td>
+                                <td style={{ verticalAlign: "middle" }}>{show.venue}</td>
+                                <td style={{ verticalAlign: "middle" }}>
+                                    {show.address && (
+                                        <div className="d-flex align-items-center">
+                                            <span title={show.address}>
+                                                {show.address.length > 15
+                                                    ? `${show.address.slice(0, 15)}...`
+                                                    : show.address}
+                                            </span>
+                                        </div>
+                                    )}
+                                </td>
+                                <td style={{ verticalAlign: "middle" }}>
+                                    {show.instagram && (
+                                        <div className="d-flex align-items-center">
+                                            <a
+                                                href={`https://instagram.com/${show.instagram.replace('@', '')}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                            >
+                                                <FaInstagram className="me-2" />
+                                            </a>
+                                        </div>
+                                    )}
+                                </td>
+                                <td style={{ verticalAlign: "middle" }}>
+                                    {show.web && (
+                                        <div className="d-flex align-items-center">
+                                            <a
+                                                href={show.web.startsWith('http') ? show.web : `https://${show.web}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                            >
+                                                <FaGlobe className="me-2" />
+                                            </a>
+                                        </div>
+                                    )}
+                                </td>
+                                <td style={{ verticalAlign: "middle" }}>
+                                    {show.url && (
+                                        <div className="d-flex align-items-center">
+                                            <a
+                                                href={show.url.startsWith('http') ? show.url : `https://${show.url}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                            >
+                                                <FaCopy className="me-2" />
+                                            </a>
+                                        </div>
+                                    )}
+                                </td>
                                 <td className="text-center align-content-center">
-                                    <Button
-                                        onClick={() => {
-                                            setSelectedEvent(show); // Establecer el evento seleccionado
-                                            setIsEditModalOpen(true); // Abrir el modal de edición
-                                        }}
-                                        className="table-buttons m-1"
-                                    >
-                                        Editar
-                                    </Button>
-                                    <Button
-                                        onClick={() =>
-                                            showDeleteConfirmation(show.show_id, show.title)
-                                        }
-                                        variant="danger"
-                                        className="table-buttons m-1"
-                                    >
-                                        Borrar
-                                    </Button>
+                                    <div className="d-flex justify-content-center">
+                                        <span
+                                            onClick={() => {
+                                                setSelectedEvent(show);
+                                                setIsEditModalOpen(true);
+                                            }}
+                                            className="text-primary mx-2"
+                                            style={{ cursor: "pointer", fontSize: "1.2rem" }}
+                                            title="Editar"
+                                        >
+                                            <FaEdit />
+                                        </span>
+                                        <span
+                                            onClick={() => showDeleteConfirmation(show.show_id, show.title)}
+                                            className="text-danger mx-2"
+                                            style={{ cursor: "pointer", fontSize: "1.2rem" }}
+                                            title="Eliminar"
+                                        >
+                                            <FaTrash />
+                                        </span>
+                                    </div>
                                 </td>
                             </tr>
                         ))}
@@ -178,12 +220,11 @@ const TableShows = () => {
                     selectedEvent={null}
                 />
 
-                {/* Modal para editar evento */}
                 <ModalCustom
                     showModal={isEditModalOpen}
                     toggleModal={() => setIsEditModalOpen(false)}
                     getShows={getShows}
-                    selectedEvent={selectedEvent} // Pasa el evento seleccionado para editar al modal
+                    selectedEvent={selectedEvent}
                 />
                 <Modal
                     centered

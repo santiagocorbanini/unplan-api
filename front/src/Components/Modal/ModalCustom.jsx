@@ -143,6 +143,9 @@ const ModalCustom = ({ showModal, toggleModal, getShows, selectedEvent }) => {
                         event_date: selectedEvent?.event_date ? formatDate(selectedEvent.event_date) : "",
                         flyer: selectedEvent?.flyer || "",
                         categories: selectedEvent?.categories || [],
+                        address: selectedEvent?.address || "",
+                        instagram: selectedEvent?.instagram || "",
+                        web: selectedEvent?.web || "",
                     }}
                     onSubmit={handleSubmit}
                 >
@@ -151,10 +154,10 @@ const ModalCustom = ({ showModal, toggleModal, getShows, selectedEvent }) => {
                             {/* title */}
                             <div className="form-group">
                                 <label className="mb-1" htmlFor="title">
-                                    Evento
+                                    Evento *
                                 </label>
                                 <Field
-                                    placeholder="Ingrese el nombre del evento"
+                                    placeholder="Nombre del evento (Feria .., Andres Calamaro, etc.)"
                                     type="text"
                                     id="title"
                                     name="title"
@@ -162,6 +165,23 @@ const ModalCustom = ({ showModal, toggleModal, getShows, selectedEvent }) => {
                                 />
                                 <ErrorMessage
                                     name="title"
+                                    component="div"
+                                    className="text-danger"
+                                />
+                            </div>
+                            {/* event_date */}
+                            <div className="form-group">
+                                <label className="mb-1" htmlFor="event_date">
+                                    Fecha del Evento *
+                                </label>
+                                <Field
+                                    type="date"
+                                    id="event_date"
+                                    name="event_date"
+                                    className="form-control mb-2"
+                                />
+                                <ErrorMessage
+                                    name="event_date"
                                     component="div"
                                     className="text-danger"
                                 />
@@ -188,10 +208,10 @@ const ModalCustom = ({ showModal, toggleModal, getShows, selectedEvent }) => {
                             {/* venue */}
                             <div className="form-group">
                                 <label className="mb-1" htmlFor="venue">
-                                    Lugar
+                                    Lugar *
                                 </label>
                                 <Field
-                                    placeholder="Ingrese el nombre del lugar"
+                                    placeholder="Nombre del lugar (Teatro San Carlos, City Rock, etc.)"
                                     type="text"
                                     id="venue"
                                     name="venue"
@@ -203,10 +223,30 @@ const ModalCustom = ({ showModal, toggleModal, getShows, selectedEvent }) => {
                                     className="text-danger"
                                 />
                             </div>
+
+                            {/* address */}
+                            <div className="form-group">
+                                <label className="mb-1" htmlFor="address">
+                                    Dirección
+                                </label>
+                                <Field
+                                    placeholder="Dirección del lugar (Calle, Número, etc.)"
+                                    type="text"
+                                    id="address"
+                                    name="address"
+                                    className="form-control mb-2"
+                                />
+                                <ErrorMessage
+                                    name="address"
+                                    component="div"
+                                    className="text-danger"
+                                />
+                            </div>
+
                             {/* url */}
                             <div className="form-group">
                                 <label className="mb-1" htmlFor="url">
-                                    URL
+                                    URL de entradas *
                                 </label>
                                 <Field
                                     placeholder="Ingrese la url de entradas"
@@ -221,19 +261,40 @@ const ModalCustom = ({ showModal, toggleModal, getShows, selectedEvent }) => {
                                     className="text-danger"
                                 />
                             </div>
-                            {/* event_date */}
+
+                            {/* instagram */}
                             <div className="form-group">
-                                <label className="mb-1" htmlFor="event_date">
-                                    Fecha del Evento
+                                <label className="mb-1" htmlFor="instagram">
+                                    Instagram
                                 </label>
                                 <Field
-                                    type="date"
-                                    id="event_date"
-                                    name="event_date"
+                                    placeholder="Ingrese el perfil de Instagram"
+                                    type="text"
+                                    id="instagram"
+                                    name="instagram"
                                     className="form-control mb-2"
                                 />
                                 <ErrorMessage
-                                    name="event_date"
+                                    name="instagram"
+                                    component="div"
+                                    className="text-danger"
+                                />
+                            </div>
+
+                            {/* web */}
+                            <div className="form-group">
+                                <label className="mb-1" htmlFor="web">
+                                    Sitio web
+                                </label>
+                                <Field
+                                    placeholder="URL del sitio web si tiene"
+                                    type="text"
+                                    id="web"
+                                    name="web"
+                                    className="form-control mb-2"
+                                />
+                                <ErrorMessage
+                                    name="web"
                                     component="div"
                                     className="text-danger"
                                 />
@@ -274,10 +335,9 @@ const ModalCustom = ({ showModal, toggleModal, getShows, selectedEvent }) => {
                             </div> */}
                             <div className="form-group">
                                 <label className="mb-1" htmlFor="categories">
-                                    Categorías
+                                    Categorías (máximo 3) *
                                 </label>
                                 <div className="form-group">
-                                    <label className="mb-1">Categorías</label>
                                     <div className="d-flex flex-wrap gap-2">
                                         {categoryOptions.map((category) => (
                                             <div key={category} className="form-check">
@@ -290,6 +350,15 @@ const ModalCustom = ({ showModal, toggleModal, getShows, selectedEvent }) => {
                                                     onChange={(e) => {
                                                         const { checked, value } = e.target;
                                                         if (checked) {
+                                                            // Verificar que no se exceda el límite de 3 categorías
+                                                            if (formikProps.values.categories.length >= 3) {
+                                                                Swal.fire({
+                                                                    title: "Límite alcanzado",
+                                                                    text: "Solo puedes seleccionar hasta 3 categorías",
+                                                                    icon: "warning",
+                                                                });
+                                                                return;
+                                                            }
                                                             formikProps.setFieldValue("categories", [
                                                                 ...formikProps.values.categories,
                                                                 value,
@@ -302,6 +371,10 @@ const ModalCustom = ({ showModal, toggleModal, getShows, selectedEvent }) => {
                                                         }
                                                     }}
                                                     className="form-check-input"
+                                                    disabled={
+                                                        !formikProps.values.categories.includes(category) &&
+                                                        formikProps.values.categories.length >= 3
+                                                    }
                                                 />
                                                 <label htmlFor={category} className="form-check-label ms-1">
                                                     {category}
@@ -309,19 +382,16 @@ const ModalCustom = ({ showModal, toggleModal, getShows, selectedEvent }) => {
                                             </div>
                                         ))}
                                     </div>
+                                    <small className="text-muted">
+                                        Seleccionadas: {formikProps.values.categories.length}/3
+                                    </small>
                                     <ErrorMessage name="categories" component="div" className="text-danger" />
                                 </div>
-
-                                <ErrorMessage
-                                    name="categories"
-                                    component="div"
-                                    className="text-danger"
-                                />
                             </div>
                             {/* flyer */}
                             <div className="form-group">
                                 <label className="mb-1" htmlFor="flyer">
-                                    Flyer
+                                    Flyer *
                                 </label>
                                 <input
                                     type="file"
