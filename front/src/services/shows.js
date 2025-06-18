@@ -14,8 +14,8 @@ export const updateShow = async (showId, data) => {
 
 export const getAllShows = async () => {
   try {
-    const response = await api.get(`/shows/actualShows`);
-    return response;
+    const response = await api.get(`/shows/actualShows?page=1`);
+    return response.data;
   } catch (error) {
     console.error("Error al obtener los shows:", error);
     throw error;

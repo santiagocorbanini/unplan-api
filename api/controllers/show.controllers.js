@@ -11,18 +11,22 @@ const getAll = async (_, res) => {
 
 const getActualShows = async (req, res) => {
     try {
-      const { page = 1 } = req.query;
-      const parsedPage = parseInt(page) || 1;
+      const { page = 1, pageSize = 15, categorias, search } = req.query;
   
-      const response = await showModel.findActualShows(parsedPage);
+      const parsedPage = parseInt(page) || 1;
+      const parsedPageSize = parseInt(pageSize) || 15;
+  
+      const categoriesArray = categorias ? categorias.split(',') : [];
+      const searchText = search ? search.toLowerCase() : null;
+  
+      const response = await showModel.findActualShows(parsedPage, parsedPageSize, categoriesArray, searchText);
       res.json(response);
     } catch (error) {
-      console.log(error);
+      console.error("Error al obtener shows actuales filtrados:", error);
       res.status(500).json({ error: "Error al obtener shows actuales" });
     }
-  };
+};  
   
-
 //Todos los shows con propiedas de Main (url, flyer)
 const getListShowsMain = async (_, res) => {
   try {
@@ -132,7 +136,7 @@ const searchShows = async (req, res) => {
       console.error("Error al buscar shows:", error);
       res.status(500).json({ error: "Error al buscar los espectáculos." });
     }
-  };  
+};  
 
 export const showController = {
   getAll,

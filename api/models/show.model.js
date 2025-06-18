@@ -7,26 +7,43 @@ const findAll = async () => {
   return rows;
 };
 
-const findActualShows = async (page = 1, pageSize = 15) => {
+const findActualShows = async (page = 1, pageSize = 15, categorias = [], search = null) => {
     const offset = (page - 1) * pageSize;
+    const values = [];
+    let whereClauses = [`event_date >= CURRENT_DATE`];
+  
+    if (categorias.length > 0) {
+      const categoriaConditions = categorias.map((cat) => {
+        values.push(`%${cat.toLowerCase()}%`);
+        return `LOWER(ARRAY_TO_STRING(categories, ',')) LIKE $${values.length}`;
+      });
+      whereClauses.push(`(${categoriaConditions.join(" OR ")})`);
+    }
+  
+    if (search) {
+      values.push(`%${search.toLowerCase()}%`);
+      whereClauses.push(`LOWER(title) LIKE $${values.length}`);
+    }
+  
+    values.push(pageSize);
+    values.push(offset);
+  
+    const whereSQL = whereClauses.length ? `WHERE ${whereClauses.join(" AND ")}` : "";
   
     const query = `
-      SELECT * 
-      FROM shows 
-      WHERE event_date >= CURRENT_DATE
+      SELECT * FROM shows
+      ${whereSQL}
       ORDER BY event_date ASC
-      LIMIT $1 OFFSET $2
+      LIMIT $${values.length - 1} OFFSET $${values.length}
     `;
   
-    const values = [pageSize, offset];
     const { rows } = await pool.query(query, values);
   
     const countQuery = `
-      SELECT COUNT(*) 
-      FROM shows 
-      WHERE event_date >= CURRENT_DATE
+      SELECT COUNT(*) FROM shows
+      ${whereSQL}
     `;
-    const countResult = await pool.query(countQuery);
+    const countResult = await pool.query(countQuery, values.slice(0, -2));
     const total = parseInt(countResult.rows[0].count);
   
     return {
@@ -36,8 +53,7 @@ const findActualShows = async (page = 1, pageSize = 15) => {
       page,
       pageSize
     };
-  };
-  
+};  
 
 const findListShowsMain = async () => {
   const { rows } = await pool.query("SELECT url FROM shows");
