@@ -91,7 +91,7 @@ const TableShows = () => {
                             <th scope="col">Categoría*</th>
                             <th scope="col">Fecha*</th>
                             <th scope="col">Lugar*</th>
-                            <th scope="col"><FaMapMarkerAlt className="me-2" />Dir</th>
+                            <th scope="col">Dir</th>
                             <th scope="col">Insta</th>
                             <th scope="col">Web</th>
                             <th scope="col">Ticket</th>
@@ -135,7 +135,17 @@ const TableShows = () => {
                                     {show.event_date &&
                                         format(new Date(show.event_date), "dd/MM/yyyy")}
                                 </td>
-                                <td style={{ verticalAlign: "middle" }}>{show.venue}</td>
+                                <td style={{ verticalAlign: "middle" }}>
+                                    {show.venue && (
+                                        <div className="d-flex align-items-center">
+                                            <span title={show.venue}>
+                                                {show.venue.length > 15
+                                                    ? `${show.venue.slice(0, 15)}...`
+                                                    : show.venue}
+                                            </span>
+                                        </div>
+                                    )}
+                                </td>
                                 <td style={{ verticalAlign: "middle" }}>
                                     {show.address && (
                                         <div className="d-flex align-items-center">

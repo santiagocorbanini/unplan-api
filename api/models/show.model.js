@@ -7,17 +7,37 @@ const findAll = async () => {
   return rows;
 };
 
-const findActualShows = async () => {
-  const query = `
-        SELECT * 
-        FROM shows 
-        WHERE event_date >= CURRENT_DATE 
-        ORDER BY event_date ASC
-      `;
-
-  const { rows } = await pool.query(query);
-  return rows;
-};
+const findActualShows = async (page = 1, pageSize = 15) => {
+    const offset = (page - 1) * pageSize;
+  
+    const query = `
+      SELECT * 
+      FROM shows 
+      WHERE event_date >= CURRENT_DATE
+      ORDER BY event_date ASC
+      LIMIT $1 OFFSET $2
+    `;
+  
+    const values = [pageSize, offset];
+    const { rows } = await pool.query(query, values);
+  
+    const countQuery = `
+      SELECT COUNT(*) 
+      FROM shows 
+      WHERE event_date >= CURRENT_DATE
+    `;
+    const countResult = await pool.query(countQuery);
+    const total = parseInt(countResult.rows[0].count);
+  
+    return {
+      data: rows,
+      total,
+      totalPages: Math.ceil(total / pageSize),
+      page,
+      pageSize
+    };
+  };
+  
 
 const findListShowsMain = async () => {
   const { rows } = await pool.query("SELECT url FROM shows");
@@ -55,15 +75,15 @@ const createShow = async (body) => {
     const {
       title,
       venue,
-      event_date = null,
+      event_date,
       city,
       url,
       completedevent,
       flyer,
-      categories,
-      instagram = null,
-      web = null,
-      address = null,
+      categories = [],
+      instagram,
+      web,
+      address,
     } = body;
   
     try {
@@ -155,7 +175,7 @@ const updateShow = async (show_id, newData) => {
   
       if (Buffer.isBuffer(flyer)) {
         query += `, flyer = $11`;
-        values.push(flyerBuffer);
+        values.push(flyer);
       }
   
       query += " WHERE show_id = $1 RETURNING *";
@@ -165,13 +185,38 @@ const updateShow = async (show_id, newData) => {
       if (rows.length === 0) {
         throw new Error("No se encontró ningún espectáculo con el ID especificado");
       }
-  
       return rows[0];
     } catch (error) {
       console.error("Error al actualizar el espectáculo:", error);
       throw error;
     }
   };
+
+  const searchShowsByTitle = async (title, page = 1, pageSize = 15) => {
+    const offset = (page - 1) * pageSize;
+    const query = `
+      SELECT * 
+      FROM shows 
+      WHERE LOWER(title) LIKE LOWER($1)
+      AND event_date >= CURRENT_DATE 
+      ORDER BY event_date ASC
+      LIMIT $2 OFFSET $3
+    `;
+    const values = [`%${title}%`, pageSize, offset];
+    const { rows } = await pool.query(query, values);
+  
+    const countQuery = `SELECT COUNT(*) FROM shows WHERE LOWER(title) LIKE LOWER($1) AND event_date >= CURRENT_DATE`;
+    const countResult = await pool.query(countQuery, [`%${title}%`]);
+    const total = parseInt(countResult.rows[0].count);
+  
+    return {
+      data: rows,
+      total,
+      totalPages: Math.ceil(total / pageSize),
+      page,
+      pageSize
+    };
+  };  
 
 export const showModel = {
   findAll,
@@ -183,4 +228,5 @@ export const showModel = {
   updateShow,
   getShowById,
   updateShow,
+  searchShowsByTitle
 };

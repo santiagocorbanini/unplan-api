@@ -17,12 +17,10 @@ router.get("/listShowsProximos", showController.getListShowsProximos);
 router.delete("/deleteShow/:show_id", showController.deleteShow);
 router.put("/updateShow/:show_id", showController.updateShow);
 router.get("/show/:show_id", showController.getShowById);
-//router.put("/updateShow/:show_id", showController.updateShow)
 router.put("/updateShow/:show_id", upload.single("flyer"), async (req, res) => {
   try {
     const { show_id } = req.params;
     const newData = req.body;
-
     // Si se proporciona una nueva flyer, adjúntala a newData
     if (req.file) {
       newData.flyer = req.file.buffer.toString("base64"); // Convierte el buffer a una cadena base64
@@ -37,5 +35,6 @@ router.put("/updateShow/:show_id", upload.single("flyer"), async (req, res) => {
     res.status(500).json({ error: "Error al actualizar el espectáculo" });
   }
 });
+router.post("/search", showController.searchShows);
 
 export default router;

@@ -9,14 +9,19 @@ const getAll = async (_, res) => {
   }
 };
 
-const getActualShows = async (_, res) => {
-  try {
-    const response = await showModel.findActualShows();
-    res.json(response);
-  } catch (error) {
-    console.log(error);
-  }
-};
+const getActualShows = async (req, res) => {
+    try {
+      const { page = 1 } = req.query;
+      const parsedPage = parseInt(page) || 1;
+  
+      const response = await showModel.findActualShows(parsedPage);
+      res.json(response);
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: "Error al obtener shows actuales" });
+    }
+  };
+  
 
 //Todos los shows con propiedas de Main (url, flyer)
 const getListShowsMain = async (_, res) => {
@@ -71,7 +76,6 @@ const updateShow = async (req, res) => {
   try {
     const { show_id } = req.params;
     const newData = req.body;
-
     // Comprobar si hay un nuevo flyer en formato base64
     if (
       newData.flyer &&
@@ -114,6 +118,22 @@ const uploadImage = async (req, res) => {
   }
 };
 
+const searchShows = async (req, res) => {
+    try {
+      const { title, page } = req.body;
+  
+      if (!title || title.trim() === "") {
+        return res.status(400).json({ error: "Debe proporcionar un título para buscar." });
+      }
+  
+      const results = await showModel.searchShowsByTitle(title, page);
+      res.json(results);
+    } catch (error) {
+      console.error("Error al buscar shows:", error);
+      res.status(500).json({ error: "Error al buscar los espectáculos." });
+    }
+  };  
+
 export const showController = {
   getAll,
   getActualShows,
@@ -124,4 +144,5 @@ export const showController = {
   updateShow,
   getShowById,
   uploadImage,
+  searchShows
 };
