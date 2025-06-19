@@ -33,23 +33,33 @@ const ModalAgregar = ({ showModal, toggleModal, getShows }) => {
 
     const handleSubmit = async (values) => {
         try {
-            const showData = {
-                ...values,
-                categories: `{${categories.join(",")}}`, // Formato correcto para PostgreSQL array
-                address: values.address || null, // Manejo explícito de campos opcionales
-                instagram: values.instagram || null,
-                web: values.web || null,
-                image: file // Asegurar que la imagen se incluya
-            };
+            const formData = new FormData();
+            formData.append("title", values.title);
+            formData.append("venue", values.venue);
+            formData.append("url", values.url);
+            formData.append("event_date", values.event_date);
+            formData.append("address", values.address || "");
+            formData.append("instagram", values.instagram || "");
+            formData.append("web", values.web || "");
 
-            console.log("Datos a enviar:", showData); // Para depuración
+            // Imagen
+            if (file) {
+                formData.append("flyer", file);
+            }
 
-            await createShow(showData);
+            // Enviar cada categoría como entrada separada
+            categories.forEach((cat) => {
+                formData.append("categories", cat);
+            });
+
+            await createShow(formData);
+
             Swal.fire({
                 title: "Evento agregado",
                 text: "El evento se ha agregado correctamente.",
                 icon: "success",
             });
+
             toggleModal();
             getShows();
         } catch (error) {
@@ -61,6 +71,7 @@ const ModalAgregar = ({ showModal, toggleModal, getShows }) => {
             });
         }
     };
+
 
     const handleChange = (file) => {
         if (file.size > 1048576) {

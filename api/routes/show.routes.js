@@ -1,40 +1,44 @@
 import { Router } from "express";
 import { showController } from "../controllers/show.controllers.js";
-// Importar multer y otras dependencias necesarias
 import multer from "multer";
-
-// Configurar multer para guardar las imágenes en el sistema de archivos
-const storage = multer.memoryStorage(); // Puedes ajustar esto según tus necesidades
-const upload = multer({ storage: storage });
+import fs from "fs";
+import path from "path";
 
 const router = Router();
 
+// Configuración del almacenamiento de archivos
+const uploadDir = path.resolve("public/uploads");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const ext = file.originalname.split(".").pop();
+    const uniqueName = `flyer-${Date.now()}.${ext}`;
+    cb(null, uniqueName);
+  },
+});
+
+const upload = multer({ storage });
+
 router.get("/", showController.getAll);
 router.get("/actualShows", showController.getActualShows);
-router.post("/", upload.single("flyer"), showController.createShow); // Use multer middleware for image upload
 router.get("/listShowsMain", showController.getListShowsMain);
 router.get("/listShowsProximos", showController.getListShowsProximos);
-router.delete("/deleteShow/:show_id", showController.deleteShow);
-router.put("/updateShow/:show_id", showController.updateShow);
 router.get("/show/:show_id", showController.getShowById);
-router.put("/updateShow/:show_id", upload.single("flyer"), async (req, res) => {
-  try {
-    const { show_id } = req.params;
-    const newData = req.body;
-    // Si se proporciona una nueva flyer, adjúntala a newData
-    if (req.file) {
-      newData.flyer = req.file.buffer.toString("base64"); // Convierte el buffer a una cadena base64
-      // O guarda el buffer directamente dependiendo de tus necesidades
-      // newData.flyer = req.file.buffer;
-    }
-
-    const response = await showController.updateShow(show_id, newData);
-    res.json(response);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error al actualizar el espectáculo" });
-  }
-});
 router.post("/search", showController.searchShows);
+
+// Ruta para crear show con imagen
+router.post("/", upload.single("flyer"), showController.createShow);
+
+// Ruta para actualizar show con imagen
+router.put("/updateShow/:show_id", upload.single("flyer"), showController.updateShow);
+
+// Eliminar show
+router.delete("/deleteShow/:show_id", showController.deleteShow);
 
 export default router;

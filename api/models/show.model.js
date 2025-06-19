@@ -95,32 +95,22 @@ const createShow = async (body) => {
       city,
       url,
       completedevent,
-      flyer,
       categories = [],
       instagram,
       web,
       address,
+      image_url,
     } = body;
+
+    const parsedCategories = Array.isArray(categories)
+    ? categories
+    : categories ? [categories] : [];
   
     try {
-      let flyerBuffer = null;
-  
-      if (Buffer.isBuffer(flyer)) {
-        flyerBuffer = flyer;
-      } else if (
-        flyer &&
-        typeof flyer === "string" &&
-        flyer.startsWith("data:image")
-      ) {
-        flyerBuffer = Buffer.from(flyer.split(",")[1], "base64");
-      } else {
-        throw new Error("Formato de flyer inválido");
-      }
-  
       const query = `
         INSERT INTO shows (
           title, venue, event_date, city, url, completedevent,
-          flyer, categories, instagram, web, address
+          categories, instagram, web, address, image_url
         )
         VALUES ($1, $2, $3, $4, $5, $6,
                 $7, $8, $9, $10, $11)
@@ -133,11 +123,11 @@ const createShow = async (body) => {
         city,
         url,
         completedevent,
-        flyerBuffer,
-        categories,
+        parsedCategories,
         instagram,
         web,
         address,
+        image_url
       ];
   
       const { rows } = await pool.query(query, values);
@@ -148,20 +138,19 @@ const createShow = async (body) => {
     }
   };
   
-const updateShow = async (show_id, newData) => {
+  const updateShow = async (show_id, newData) => {
     const {
       title,
       venue,
       city,
       url,
-      flyer,
       event_date,
-      categories,
+      categories = [],
       instagram,
       web,
       address,
+      image_url // NUEVO
     } = newData;
-  
   
     try {
       let query = `
@@ -186,12 +175,12 @@ const updateShow = async (show_id, newData) => {
         categories,
         instagram,
         web,
-        address,
+        address
       ];
   
-      if (Buffer.isBuffer(flyer)) {
-        query += `, flyer = $11`;
-        values.push(flyer);
+      if (image_url) {
+        query += `, image_url = $11`;
+        values.push(image_url);
       }
   
       query += " WHERE show_id = $1 RETURNING *";

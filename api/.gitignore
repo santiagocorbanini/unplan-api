@@ -1,7 +1,7 @@
 # Node.js
 node_modules/
 .env
-
+api/.env 
 # Vite build output
 dist/
 
@@ -13,3 +13,5 @@ yarn-error.log*
 # Editor settings
 .vscode/
 .idea/
+
+public/

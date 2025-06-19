@@ -43,50 +43,36 @@ const ModalCustom = ({ showModal, toggleModal, getShows, selectedEvent }) => {
     };
 
     const handleSubmit = async (values) => {
-        console.log("entro con estas categorias:", values.categories);
-        //const newCategories = values.categories
-        //    ? `{${values.categories.split(",").map(item => item.trim()).join(",")}}`
-        //    : null;
-        // Luego pasarlo a tu API
-
-        //values.categories = newCategories
-
-        const payload = {
-            ...values,
-            categories: `{${values.categories.join(",")}}`, // convierte a formato {Música,Teatro}
-        };
         try {
+            const formData = new FormData();
+
+            formData.append("title", values.title);
+            formData.append("venue", values.venue);
+            formData.append("city", values.city);
+            formData.append("url", values.url);
+            formData.append("event_date", values.event_date);
+            formData.append("address", values.address);
+            formData.append("instagram", values.instagram);
+            formData.append("web", values.web);
+            formData.append("categories", values.categories);
+
+            if (values.flyerFile) {
+                formData.append("flyer", values.flyerFile); // clave "flyer" es la usada por multer
+            }
+
             if (isEditMode) {
-                // Llamar a updateShow
-                await updateShow(selectedEvent.show_id, payload);
-                Swal.fire({
-                    title: "Evento editado",
-                    text: "El evento se ha editado correctamente.",
-                    icon: "success",
-                });
+                await updateShow(selectedEvent.show_id, formData); // importante: también debe aceptar FormData
+                Swal.fire("Editado", "El evento fue actualizado.", "success");
             } else {
-                // Llamar a createShow
-                await createShow(payload);
-                Swal.fire({
-                    title: "Evento agregado",
-                    text: "El evento se ha agregado correctamente.",
-                    icon: "success",
-                });
+                await createShow(formData);
+                Swal.fire("Agregado", "El evento fue creado.", "success");
             }
 
             toggleModal();
             getShows();
         } catch (error) {
-            console.error(
-                `Error al ${isEditMode ? "editar" : "agregar"} el evento:`,
-                error.message
-            );
-
-            Swal.fire({
-                title: "Error",
-                text: `Hubo un problema al ${isEditMode ? "editar" : "agregar"} el evento.`,
-                icon: "error",
-            });
+            console.error("Error al enviar el evento:", error);
+            Swal.fire("Error", "No se pudo procesar el evento.", "error");
         }
     };
 
@@ -94,36 +80,14 @@ const ModalCustom = ({ showModal, toggleModal, getShows, selectedEvent }) => {
     const handleChange = (event, formikprops) => {
         const file = event.currentTarget.files[0];
 
-        if (!file) {
-            // El usuario ha cancelado la selección, no hay archivo seleccionado
+        if (!file) return;
+
+        if (file.size > 5 * 1024 * 1024) {
+            Swal.fire("Error", "La imagen no debe superar 5MB", "error");
             return;
         }
 
-        if (file.size > 5 * 1024 * 1024) { // 5 MB = 5 * 1024 * 1024 bytes
-            Swal.fire({
-                title: "Error",
-                text: "La imagen debe tener un tamaño de hasta 5MB.",
-                icon: "error",
-            });
-        } else {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const base64data = reader.result; // Contiene la imagen en base64
-                if (base64data && base64data.startsWith("data:image")) {
-                    console.log(
-                        "Conversión a base64 exitosa. Valor de base64data:",
-                        base64data
-                    );
-                    formikprops.setFieldValue("flyer", base64data); // Asigna la imagen al campo "flyer" del formulario
-                } else {
-                    console.log(
-                        "Hubo un problema con la conversión a base64. Valor de base64data:",
-                        base64data
-                    );
-                }
-            };
-            reader.readAsDataURL(file);
-        }
+        formikprops.setFieldValue("flyerFile", file); // guardamos el archivo real
     };
 
     return (
@@ -141,11 +105,11 @@ const ModalCustom = ({ showModal, toggleModal, getShows, selectedEvent }) => {
                         venue: selectedEvent?.venue || "",
                         url: selectedEvent?.url || "",
                         event_date: selectedEvent?.event_date ? formatDate(selectedEvent.event_date) : "",
-                        flyer: selectedEvent?.flyer || "",
                         categories: selectedEvent?.categories || [],
                         address: selectedEvent?.address || "",
                         instagram: selectedEvent?.instagram || "",
                         web: selectedEvent?.web || "",
+                        flyerFile: null
                     }}
                     onSubmit={handleSubmit}
                 >

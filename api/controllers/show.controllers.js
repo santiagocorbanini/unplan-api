@@ -48,21 +48,21 @@ const getListShowsProximos = async (_, res) => {
 };
 
 const createShow = async (req, res) => {
-  try {
-    const body = req.body;
-    const flyer = req.file; // Access the uploaded file using req.file
-
-    // Check if an image was provided
-    if (flyer) {
-      body.flyer = flyer.buffer; // Update this based on your database model
+    try {
+      const body = req.body;
+      const flyer = req.file;
+  
+      if (flyer) {
+        const imageUrl = `${req.protocol}://${req.get("host")}/uploads/${flyer.filename}`;
+        body.image_url = imageUrl;
+      }
+  
+      const response = await showModel.createShow(body);
+      res.json(response);
+    } catch (error) {
+      console.error("Error al crear el espectáculo:", error);
+      res.status(500).json({ error: "Error al crear el espectáculo" });
     }
-
-    const response = await showModel.createShow(body);
-    res.json(response);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Error al crear el espectáculo" });
-  }
 };
 
 const deleteShow = async (req, res) => {
@@ -77,27 +77,28 @@ const deleteShow = async (req, res) => {
 };
 
 const updateShow = async (req, res) => {
-  try {
-    const { show_id } = req.params;
-    const newData = req.body;
-    // Comprobar si hay un nuevo flyer en formato base64
-    if (
-      newData.flyer &&
-      typeof newData.flyer === "string" &&
-      newData.flyer.startsWith("data:image")
-    ) {
-      // Decodificar la cadena base64 y almacenarla como un buffer
-      const flyerBuffer = Buffer.from(newData.flyer.split(",")[1], "base64");
-      newData.flyer = flyerBuffer;
+    try {
+      const { show_id } = req.params;
+      let newData = req.body;
+  
+      // Manejar categories si viene como string CSV (porque multer no parsea arrays automáticamente)
+      if (newData.categories && typeof newData.categories === "string") {
+        newData.categories = newData.categories.split(",").map(cat => cat.trim());
+      }
+  
+      // Si hay un archivo nuevo de flyer, agregamos la URL construida para la respuesta
+      if (req.file) {
+        const imageUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+        newData.image_url = imageUrl;
+      }
+  
+      const response = await showModel.updateShow(show_id, newData);
+      res.json(response);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Error al actualizar el espectáculo" });
     }
-
-    const response = await showModel.updateShow(show_id, newData);
-    res.json(response);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error al actualizar el espectáculo" });
-  }
-};
+  };
 
 const getShowById = async (req, res) => {
   try {
@@ -109,6 +110,7 @@ const getShowById = async (req, res) => {
     res.status(500).json({ error: "Error al buscar el show" });
   }
 };
+
 const uploadImage = async (req, res) => {
   try {
     const imageBuffer = req.file.buffer; // Obtén los datos binarios de la imagen

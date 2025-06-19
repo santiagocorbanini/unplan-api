@@ -1,11 +1,13 @@
 import "dotenv/config";
 import express from "express";
 import showRoute from "./routes/show.routes.js";
+import path from "path";
 
 const app = express();
 
 app.use(express.json({ limit: "10mb" })); // Cambia "10mb" según sea necesario
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+app.use("/uploads", express.static(path.join("public/uploads")));
 
 /*
 const allowedOrigins = [

@@ -1,16 +1,24 @@
 import api from "./api";
 
 // Crear un nuevo evento
-export const createShow = async (data) => {
-  const response = await api.post("/shows/", data);
-  return response.data;
+export const createShow = async (formData) => {
+    const response = await api.post("/shows/", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
 };
 
 // Actualizar un evento existente
-export const updateShow = async (showId, data) => {
-  const response = await api.put(`/shows/updateShow/${showId}`, data);
-  return response.data;
-};
+export const updateShow = async (showId, formData) => {
+    const response = await api.put(`/shows/updateShow/${showId}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  };
 
 export const getAllShows = async () => {
   try {

@@ -105,13 +105,12 @@ const TableShows = () => {
                             <tr key={index}>
                                 <td style={{ verticalAlign: "middle" }}>{show.show_id}</td>
                                 <td style={{ verticalAlign: "middle", textAlign: "center" }}>
-                                    {show.flyer?.data ? (
+                                    {show.image_url ? (
                                         <img
-                                            src={`data:image/jpg;base64,${btoa(
-                                                new Uint8Array(show.flyer.data).reduce((data, byte) => data + String.fromCharCode(byte), "")
-                                            )}`}
+                                            src={show.image_url}
                                             alt="Flyer"
                                             width={50}
+                                            style={{ maxHeight: 50, objectFit: "cover" }}
                                         />
                                     ) : (
                                         <span>Sin imagen</span>
