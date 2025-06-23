@@ -7,53 +7,66 @@ const findAll = async () => {
   return rows;
 };
 
-const findActualShows = async (page = 1, pageSize = 15, categorias = [], search = null) => {
-    const offset = (page - 1) * pageSize;
-    const values = [];
-    let whereClauses = [`event_date >= CURRENT_DATE`];
-  
-    if (categorias.length > 0) {
-      const categoriaConditions = categorias.map((cat) => {
-        values.push(`%${cat.toLowerCase()}%`);
-        return `LOWER(ARRAY_TO_STRING(categories, ',')) LIKE $${values.length}`;
-      });
-      whereClauses.push(`(${categoriaConditions.join(" OR ")})`);
-    }
-  
-    if (search) {
-      values.push(`%${search.toLowerCase()}%`);
-      whereClauses.push(`LOWER(title) LIKE $${values.length}`);
-    }
-  
-    values.push(pageSize);
-    values.push(offset);
-  
-    const whereSQL = whereClauses.length ? `WHERE ${whereClauses.join(" AND ")}` : "";
-  
-    const query = `
-      SELECT * FROM shows
-      ${whereSQL}
-      ORDER BY event_date ASC
-      LIMIT $${values.length - 1} OFFSET $${values.length}
-    `;
-  
-    const { rows } = await pool.query(query, values);
-  
-    const countQuery = `
-      SELECT COUNT(*) FROM shows
-      ${whereSQL}
-    `;
-    const countResult = await pool.query(countQuery, values.slice(0, -2));
-    const total = parseInt(countResult.rows[0].count);
-  
-    return {
-      data: rows,
-      total,
-      totalPages: Math.ceil(total / pageSize),
-      page,
-      pageSize
-    };
-};  
+const findActualShows = async (
+    page = 1, 
+    pageSize = 15, 
+    categories = [], 
+    search = null,
+    filterDate = null
+  ) => {
+      const offset = (page - 1) * pageSize;
+      const values = [];
+      let whereClauses = [`event_date >= CURRENT_DATE`];
+    
+      // Filter by specific date if provided
+      if (filterDate) {
+        const formattedDate = filterDate.toISOString().split('T')[0];
+        whereClauses.push(`DATE(event_date) = $${values.length + 1}`);
+        values.push(formattedDate);
+      }
+    
+      if (categories.length > 0) {
+        const categoryConditions = categories.map((cat) => {
+          values.push(`%${cat.toLowerCase()}%`);
+          return `LOWER(ARRAY_TO_STRING(categories, ',')) LIKE $${values.length}`;
+        });
+        whereClauses.push(`(${categoryConditions.join(" OR ")})`);
+      }
+    
+      if (search) {
+        values.push(`%${search.toLowerCase()}%`);
+        whereClauses.push(`LOWER(title) LIKE $${values.length}`);
+      }
+    
+      values.push(pageSize);
+      values.push(offset);
+    
+      const whereSQL = whereClauses.length ? `WHERE ${whereClauses.join(" AND ")}` : "";
+    
+      const query = `
+        SELECT * FROM shows
+        ${whereSQL}
+        ORDER BY event_date ASC
+        LIMIT $${values.length - 1} OFFSET $${values.length}
+      `;
+    
+      const { rows } = await pool.query(query, values);
+    
+      const countQuery = `
+        SELECT COUNT(*) FROM shows
+        ${whereSQL}
+      `;
+      const countResult = await pool.query(countQuery, values.slice(0, -2));
+      const total = parseInt(countResult.rows[0].count);
+    
+      return {
+        data: rows,
+        total,
+        totalPages: Math.ceil(total / pageSize),
+        page,
+        pageSize
+      };
+  };
 
 const findListShowsMain = async () => {
   const { rows } = await pool.query("SELECT url FROM shows");
@@ -102,9 +115,10 @@ const createShow = async (body) => {
       image_url,
     } = body;
 
+    // Asegurar que las categorías sean un array válido
     const parsedCategories = Array.isArray(categories)
-    ? categories
-    : categories ? [categories] : [];
+      ? categories.filter(cat => typeof cat === 'string' && cat.trim().length > 0)
+      : [];
   
     try {
       const query = `
@@ -123,7 +137,7 @@ const createShow = async (body) => {
         city,
         url,
         completedevent,
-        parsedCategories,
+        parsedCategories, // Enviar como array
         instagram,
         web,
         address,
@@ -136,7 +150,7 @@ const createShow = async (body) => {
       console.error("Error al crear el espectáculo:", error);
       throw error;
     }
-  };
+};
   
   const updateShow = async (show_id, newData) => {
     const {

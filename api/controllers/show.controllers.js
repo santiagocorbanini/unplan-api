@@ -11,21 +11,37 @@ const getAll = async (_, res) => {
 
 const getActualShows = async (req, res) => {
     try {
-      const { page = 1, pageSize = 15, categorias, search } = req.query;
+      const { page = 1, pageSize = 15, categories, search, date } = req.query;
   
       const parsedPage = parseInt(page) || 1;
       const parsedPageSize = parseInt(pageSize) || 15;
   
-      const categoriesArray = categorias ? categorias.split(',') : [];
+      const categoriesArray = categories ? categories.split(',') : [];
       const searchText = search ? search.toLowerCase() : null;
+      
+      // Parse the date if provided
+      let parsedDate = null;
+      if (date) {
+        const [day, month, year] = date.split('/');
+        parsedDate = new Date(`${year}-${month}-${day}`);
+        if (isNaN(parsedDate.getTime())) {
+          return res.status(400).json({ error: "Invalid date format. Use dd/mm/yyyy" });
+        }
+      }
   
-      const response = await showModel.findActualShows(parsedPage, parsedPageSize, categoriesArray, searchText);
+      const response = await showModel.findActualShows(
+        parsedPage, 
+        parsedPageSize, 
+        categoriesArray, 
+        searchText,
+        parsedDate
+      );
       res.json(response);
     } catch (error) {
-      console.error("Error al obtener shows actuales filtrados:", error);
-      res.status(500).json({ error: "Error al obtener shows actuales" });
+      console.error("Error fetching filtered shows:", error);
+      res.status(500).json({ error: "Error fetching shows" });
     }
-};  
+};
   
 //Todos los shows con propiedas de Main (url, flyer)
 const getListShowsMain = async (_, res) => {
@@ -56,6 +72,20 @@ const createShow = async (req, res) => {
         const imageUrl = `${req.protocol}://${req.get("host")}/uploads/${flyer.filename}`;
         body.image_url = imageUrl;
       }
+
+      // Procesar categorías correctamente
+      if (body.categories) {
+        // Si viene como string (JSON stringified), parsearlo
+        if (typeof body.categories === 'string') {
+          body.categories = JSON.parse(body.categories);
+        }
+        // Asegurarse que es un array y limpiar los valores
+        body.categories = Array.isArray(body.categories) 
+          ? body.categories.map(cat => cat.trim()).filter(cat => cat.length > 0)
+          : [];
+      } else {
+        body.categories = [];
+      }
   
       const response = await showModel.createShow(body);
       res.json(response);
@@ -81,9 +111,21 @@ const updateShow = async (req, res) => {
       const { show_id } = req.params;
       let newData = req.body;
   
-      // Manejar categories si viene como string CSV (porque multer no parsea arrays automáticamente)
-      if (newData.categories && typeof newData.categories === "string") {
-        newData.categories = newData.categories.split(",").map(cat => cat.trim());
+      // Procesar categorías correctamente
+      if (newData.categories) {
+        // Si viene como string (JSON stringified), parsearlo
+        if (typeof newData.categories === 'string') {
+          try {
+            newData.categories = JSON.parse(newData.categories);
+          } catch (e) {
+            // Si falla el parseo, asumir que es un string CSV
+            newData.categories = newData.categories.split(",").map(cat => cat.trim());
+          }
+        }
+        // Asegurarse que es un array y limpiar los valores
+        newData.categories = Array.isArray(newData.categories) 
+          ? newData.categories.map(cat => cat.trim()).filter(cat => cat.length > 0)
+          : [];
       }
   
       // Si hay un archivo nuevo de flyer, agregamos la URL construida para la respuesta
@@ -98,7 +140,7 @@ const updateShow = async (req, res) => {
       console.error(error);
       res.status(500).json({ error: "Error al actualizar el espectáculo" });
     }
-  };
+};
 
 const getShowById = async (req, res) => {
   try {

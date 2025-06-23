@@ -54,7 +54,7 @@ const ModalCustom = ({ showModal, toggleModal, getShows, selectedEvent }) => {
             formData.append("address", values.address);
             formData.append("instagram", values.instagram);
             formData.append("web", values.web);
-            formData.append("categories", values.categories);
+            formData.append("categories", JSON.stringify(values.categories));
 
             if (values.flyerFile) {
                 formData.append("flyer", values.flyerFile); // clave "flyer" es la usada por multer
@@ -109,7 +109,8 @@ const ModalCustom = ({ showModal, toggleModal, getShows, selectedEvent }) => {
                         address: selectedEvent?.address || "",
                         instagram: selectedEvent?.instagram || "",
                         web: selectedEvent?.web || "",
-                        flyerFile: null
+                        flyerFile: null,
+                        image_url: selectedEvent?.image_url || ""
                     }}
                     onSubmit={handleSubmit}
                 >
@@ -353,6 +354,7 @@ const ModalCustom = ({ showModal, toggleModal, getShows, selectedEvent }) => {
                                 </div>
                             </div>
                             {/* flyer */}
+                            {/* flyer */}
                             <div className="form-group">
                                 <label className="mb-1" htmlFor="flyer">
                                     Flyer *
@@ -369,18 +371,14 @@ const ModalCustom = ({ showModal, toggleModal, getShows, selectedEvent }) => {
                                     component="div"
                                     className="text-danger"
                                 />
-                                {/* Si hay flyer, mostrar la vista previa */}
-                                {selectedEvent?.flyer?.data && (
+                                {/* Mostrar la imagen existente desde la URL */}
+                                {formikProps.values.image_url && (
                                     <div className="mb-2">
                                         <img
-                                            src={`data:image/png;base64,${btoa(
-                                                new Uint8Array(selectedEvent.flyer.data).reduce(
-                                                    (data, byte) => data + String.fromCharCode(byte),
-                                                    ""
-                                                )
-                                            )}`}
-                                            alt="Placeholder"
+                                            src={formikProps.values.image_url}
+                                            alt="Flyer actual"
                                             width="100%"
+                                            style={{ maxHeight: "300px", objectFit: "contain" }}
                                         />
                                     </div>
                                 )}
