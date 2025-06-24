@@ -12,3 +12,6 @@ VITE_APP_API_URL='http://149.50.146.27:3126'
 VITE_APP_API_URL='http://149.50.146.27:3127'
 
 VITE_APP_API_URL='https://api.pampacode.com'
+
+npm run build
+npm run deploy

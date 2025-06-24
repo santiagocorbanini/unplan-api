@@ -82,10 +82,11 @@ const ModalCustom = ({ showModal, toggleModal, getShows, selectedEvent }) => {
 
         if (!file) return;
 
+        /*
         if (file.size > 5 * 1024 * 1024) {
             Swal.fire("Error", "La imagen no debe superar 5MB", "error");
             return;
-        }
+        }*/
 
         formikprops.setFieldValue("flyerFile", file); // guardamos el archivo real
     };

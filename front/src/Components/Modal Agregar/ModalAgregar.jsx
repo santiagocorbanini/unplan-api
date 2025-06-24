@@ -74,6 +74,7 @@ const ModalAgregar = ({ showModal, toggleModal, getShows }) => {
 
 
     const handleChange = (file) => {
+        /*
         if (file.size > 1048576) {
             Swal.fire({
                 title: "Error",
@@ -82,7 +83,7 @@ const ModalAgregar = ({ showModal, toggleModal, getShows }) => {
             });
         } else {
             setFile(file);
-        }
+        }*/
     };
 
     return (
