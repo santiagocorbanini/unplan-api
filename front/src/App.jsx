@@ -12,24 +12,55 @@ const auth = getAuth(app);
 const App = () => {
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const API_URL = import.meta.env.VITE_APP_API_URL;
+
+    const sendTokenToBackend = async (firebaseUser) => {
+        try {
+            console.log("🔐 Enviando token al backend...");
+            const idToken = await firebaseUser.getIdToken();
+            const response = await fetch(`${API_URL}/auth/login`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ idToken }),
+            });
+
+            if (!response.ok) {
+                const error = await response.text();
+                console.error("Error en login backend:", error);
+                return;
+            }
+
+            const data = await response.json();
+            localStorage.setItem("accessToken", data.token);
+        } catch (err) {
+            console.error("Error enviando token a backend:", err);
+        }
+    };
 
     useEffect(() => {
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
-        }
-        setIsLoading(false);
-    }, []);
+        const unsubscribe = onAuthStateChanged(auth, async (userLogged) => {
+            if (userLogged) {
+                setUser(userLogged);
+                localStorage.setItem("user", JSON.stringify(userLogged));
 
-    onAuthStateChanged(auth, (userLogged) => {
-        if (userLogged) {
-            setUser(userLogged);
-            localStorage.setItem("user", JSON.stringify(userLogged));
-        } else {
-            setUser(null);
-            localStorage.removeItem("user");
-        }
-    });
+                // Solo enviar token si aún no está guardado
+                const hasToken = localStorage.getItem("accessToken");
+                if (!hasToken) {
+                    await sendTokenToBackend(userLogged);
+                }
+            } else {
+                setUser(null);
+                localStorage.removeItem("user");
+                localStorage.removeItem("accessToken");
+            }
+
+            setIsLoading(false);
+        });
+
+        return () => unsubscribe(); // Cleanup
+    }, []);
 
     return <div>{!isLoading && (user ? <HomeView /> : <Auth />)}</div>;
 };

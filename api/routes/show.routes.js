@@ -4,6 +4,7 @@ import multer from "multer";
 import fs from "fs";
 import path from "path";
 import sharp from 'sharp';
+import { verifyToken } from "../middlewares/auth.js";
 
 const router = Router();
 
@@ -43,7 +44,7 @@ router.get("/show/:show_id", showController.getShowById);
 router.post("/search", showController.searchShows);
 
 // Ruta para crear show con imagen
-router.post("/", upload.single("flyer"), async (req, res, next) => {
+router.post("/", verifyToken, upload.single("flyer"), async (req, res, next) => {
     try {
       if (req.file) {
         const originalPath = path.join(uploadDir, req.file.filename);
@@ -75,7 +76,7 @@ router.post("/", upload.single("flyer"), async (req, res, next) => {
   }, showController.createShow);
 
 // Ruta para actualizar show con imagen
-router.put("/updateShow/:show_id", upload.single("flyer"), async (req, res, next) => {
+router.put("/updateShow/:show_id", verifyToken, upload.single("flyer"), async (req, res, next) => {
     const originalPath = req.file ? path.join(uploadDir, req.file.filename) : null;
     const tempPath = req.file ? path.join(uploadDir, `temp-${req.file.filename}`) : null;
   
@@ -102,6 +103,6 @@ router.put("/updateShow/:show_id", upload.single("flyer"), async (req, res, next
   }, showController.updateShow);
 
 // Eliminar show
-router.delete("/deleteShow/:show_id", showController.deleteShow);
+router.delete("/deleteShow/:show_id", verifyToken, showController.deleteShow);
 
 export default router;

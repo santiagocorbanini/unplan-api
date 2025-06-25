@@ -8,4 +8,16 @@ const api = axios.create({
   },
 });
 
+// Agregar token a todas las solicitudes si existe
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 export default api;
