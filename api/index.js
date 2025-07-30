@@ -3,12 +3,18 @@ import express from "express";
 import showRoute from "./routes/show.routes.js";
 import path from "path";
 import authRoutes from "./routes/auth.routes.js";
+import swaggerUi from 'swagger-ui-express';
+import swaggerSpec from './swaggerConfig.js';
+import cors from "cors";
 
 const app = express();
 
 app.use(express.json({ limit: "10mb" })); // Cambia "10mb" según sea necesario
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use("/uploads", express.static(path.join("public/uploads")));
+
+app.use('/api-docs', cors());
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 /*
 const allowedOrigins = [
@@ -35,7 +41,7 @@ app.use((req, res, next) => {
 
   next();
 });
-app.use("/auth", authRoutes); // ahora tendrás POST /auth/login
+app.use("/auth", authRoutes); 
 
 app.use("/shows", showRoute);
 

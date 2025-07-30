@@ -90,7 +90,7 @@ const createShow = async (req, res) => {
       const response = await showModel.createShow(body);
       res.json(response);
     } catch (error) {
-      console.error("Error al crear el espectáculo:", error);
+      console.error("Error al crear el espectáculo controller:", error);
       res.status(500).json({ error: "Error al crear el espectáculo" });
     }
 };
@@ -182,6 +182,31 @@ const searchShows = async (req, res) => {
     }
 };  
 
+const getFeaturedShows = async (req, res) => {
+    try {
+      const { page = 1, pageSize = 15 } = req.query;
+  
+      const parsedPage = parseInt(page) || 1;
+      const parsedPageSize = parseInt(pageSize) || 15;
+  
+      const response = await showModel.findFeaturedShows(parsedPage, parsedPageSize);
+      res.json(response);
+    } catch (error) {
+      console.error("Error al obtener shows destacados:", error);
+      res.status(500).json({ error: "Error al obtener shows destacados" });
+    }
+};
+  
+const deletePastShows = async (req, res) => {
+    try {
+      const result = await showModel.deletePastShows();
+      res.json(result);
+    } catch (error) {
+      console.error("Error al eliminar eventos pasados:", error);
+      res.status(500).json({ error: "Error al eliminar eventos pasados" });
+    }
+};
+
 export const showController = {
   getAll,
   getActualShows,
@@ -192,5 +217,7 @@ export const showController = {
   updateShow,
   getShowById,
   uploadImage,
-  searchShows
+  searchShows,
+  getFeaturedShows,
+  deletePastShows
 };

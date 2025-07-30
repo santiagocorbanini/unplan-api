@@ -1,4 +1,6 @@
 import { pool } from "../database/connection.js";
+import path from 'path';
+import fs from 'fs';
 
 const findAll = async () => {
   const { rows } = await pool.query(
@@ -80,6 +82,7 @@ const findListShowsProximos = async () => {
   return rows;
 };
 
+/*
 const deleteShow = async (show_id) => {
   const query = "DELETE FROM shows WHERE show_id = $1 RETURNING *";
   const { rows } = await pool.query(query, [show_id]);
@@ -89,6 +92,35 @@ const deleteShow = async (show_id) => {
   }
   return rows[0];
 };
+*/
+const deleteShow = async (show_id) => {
+    const selectQuery = "SELECT image_url FROM shows WHERE show_id = $1";
+    const { rows: selectRows } = await pool.query(selectQuery, [show_id]);
+  
+    if (selectRows.length === 0) {
+      throw new Error("No se encontró ningún espectáculo con el ID especificado");
+    }
+  
+    const imageUrl = selectRows[0].image_url;
+  
+    // Eliminar el archivo si existe
+    if (imageUrl) {
+      const filename = imageUrl.split('/').pop(); // extrae el nombre del archivo
+      const filePath = path.resolve('public/uploads', filename);
+  
+      try {
+        await fs.promises.unlink(filePath);
+        console.log("Imagen eliminada:", filePath);
+      } catch (err) {
+        console.warn("No se pudo eliminar la imagen:", filePath, err.message);
+      }
+    }
+  
+    const deleteQuery = "DELETE FROM shows WHERE show_id = $1 RETURNING *";
+    const { rows } = await pool.query(deleteQuery, [show_id]);
+  
+    return rows[0];
+  };
 
 const getShowById = async (show_id) => {
   const query = "SELECT * FROM shows WHERE show_id = $1";
@@ -99,6 +131,36 @@ const getShowById = async (show_id) => {
   }
   return rows[0];
 };
+
+const findFeaturedShows = async (page = 1, pageSize = 15) => {
+    const offset = (page - 1) * pageSize;
+  
+    const query = `
+      SELECT * FROM shows
+      WHERE is_featured = true
+      ORDER BY event_date ASC
+      LIMIT $1 OFFSET $2
+    `;
+  
+    const values = [pageSize, offset];
+    const { rows } = await pool.query(query, values);
+  
+    const countQuery = `
+      SELECT COUNT(*) FROM shows
+      WHERE is_featured = true
+    `;
+    const countResult = await pool.query(countQuery);
+    const total = parseInt(countResult.rows[0].count);
+  
+    return {
+      data: rows,
+      total,
+      totalPages: Math.ceil(total / pageSize),
+      page,
+      pageSize
+    };
+  };
+  
 
 const createShow = async (body) => {
     const {
@@ -113,6 +175,9 @@ const createShow = async (body) => {
       web,
       address,
       image_url,
+      is_featured = false, 
+      youtube,
+      description
     } = body;
 
     // Asegurar que las categorías sean un array válido
@@ -124,10 +189,12 @@ const createShow = async (body) => {
       const query = `
         INSERT INTO shows (
           title, venue, event_date, city, url, completedevent,
-          categories, instagram, web, address, image_url
+          categories, instagram, web, address, image_url,
+          is_featured, youtube, description
         )
         VALUES ($1, $2, $3, $4, $5, $6,
-                $7, $8, $9, $10, $11)
+                $7, $8, $9, $10, $11,
+                $12, $13, $14)
         RETURNING *`;
   
       const values = [
@@ -137,11 +204,14 @@ const createShow = async (body) => {
         city,
         url,
         completedevent,
-        parsedCategories, // Enviar como array
+        parsedCategories, 
         instagram,
         web,
         address,
-        image_url
+        image_url,
+        is_featured,
+        youtube,
+        description
       ];
   
       const { rows } = await pool.query(query, values);
@@ -163,7 +233,10 @@ const createShow = async (body) => {
       instagram,
       web,
       address,
-      image_url // NUEVO
+      is_featured,
+      youtube,
+      description,
+      image_url
     } = newData;
   
     try {
@@ -177,7 +250,10 @@ const createShow = async (body) => {
           categories = $7,
           instagram = $8,
           web = $9,
-          address = $10`;
+          address = $10,
+          is_featured = $11,
+          youtube = $12,
+          description = $13`;
   
       const values = [
         show_id,
@@ -189,11 +265,14 @@ const createShow = async (body) => {
         categories,
         instagram,
         web,
-        address
+        address,
+        is_featured,
+        youtube,
+        description
       ];
   
       if (image_url) {
-        query += `, image_url = $11`;
+        query += `, image_url = $14`;
         values.push(image_url);
       }
   
@@ -237,6 +316,57 @@ const createShow = async (body) => {
     };
   };  
 
+  const deletePastShows = async () => {
+    try {
+      // 1. Obtener todos los shows anteriores a hoy
+      const selectQuery = `
+        SELECT show_id, image_url
+        FROM shows
+        WHERE event_date < CURRENT_DATE
+      `;
+      const { rows: pastShows } = await pool.query(selectQuery);
+  
+      if (pastShows.length === 0) {
+        return { message: "No hay eventos pasados para eliminar." };
+      }
+  
+      // 2. Eliminar imágenes si existen
+      for (const show of pastShows) {
+        const imageUrl = show.image_url;
+  
+        if (imageUrl) {
+          const filename = imageUrl.split('/').pop();
+          const filePath = path.resolve('public/uploads', filename);
+  
+          try {
+            if (fs.existsSync(filePath)) {
+              await fs.promises.unlink(filePath);
+              console.log(`🗑 Imagen eliminada: ${filePath}`);
+            }
+          } catch (err) {
+            console.warn(`⚠ No se pudo eliminar la imagen: ${filePath}`, err.message);
+          }
+        }
+      }
+  
+      // 3. Eliminar los shows de la base de datos
+      const deleteQuery = `
+        DELETE FROM shows
+        WHERE event_date < CURRENT_DATE
+        RETURNING show_id
+      `;
+      const { rows: deletedRows } = await pool.query(deleteQuery);
+  
+      return {
+        message: `${deletedRows.length} eventos pasados eliminados.`,
+        deletedShowIds: deletedRows.map(r => r.show_id)
+      };
+    } catch (error) {
+      console.error("❌ Error al eliminar eventos pasados:", error);
+      throw error;
+    }
+  };
+
 export const showModel = {
   findAll,
   findActualShows,
@@ -247,5 +377,7 @@ export const showModel = {
   updateShow,
   getShowById,
   updateShow,
-  searchShowsByTitle
+  searchShowsByTitle,
+  findFeaturedShows,
+  deletePastShows
 };
