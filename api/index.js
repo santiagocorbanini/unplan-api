@@ -1,6 +1,8 @@
 import "dotenv/config";
 import express from "express";
 import showRoute from "./routes/show.routes.js";
+import lugarRoute from "./routes/lugar.routes.js";
+import seccionRoute from "./routes/seccion.routes.js";
 import path from "path";
 import authRoutes from "./routes/auth.routes.js";
 import swaggerUi from 'swagger-ui-express';
@@ -44,6 +46,10 @@ app.use((req, res, next) => {
 app.use("/auth", authRoutes); 
 
 app.use("/shows", showRoute);
+
+app.use("/lugares", lugarRoute);
+
+app.use("/secciones", seccionRoute);
 
 const PORT = process.env.PORT || 5000;
 

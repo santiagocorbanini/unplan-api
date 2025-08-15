@@ -1,4 +1,6 @@
 import { showModel } from "../models/show.model.js";
+import fs from "fs";
+import path from "path";
 
 const getAll = async (_, res) => {
   try {
@@ -63,6 +65,7 @@ const getListShowsProximos = async (_, res) => {
   }
 };
 
+/*
 const createShow = async (req, res) => {
     try {
       const body = req.body;
@@ -94,6 +97,49 @@ const createShow = async (req, res) => {
       res.status(500).json({ error: "Error al crear el espectáculo" });
     }
 };
+*/
+const createShow = async (req, res) => {
+    let flyerPath; // ruta física del archivo para borrarlo en caso de error
+    try {
+      const body = req.body;
+      const flyer = req.file;
+  
+      if (flyer) {
+        flyerPath = path.join("public", "uploads", flyer.filename);
+        const imageUrl = `${req.protocol}://${req.get("host")}/uploads/${flyer.filename}`;
+        body.image_url = imageUrl;
+      }
+  
+      // Procesar categorías correctamente
+      if (body.categories) {
+        if (typeof body.categories === 'string') {
+          body.categories = JSON.parse(body.categories);
+        }
+        body.categories = Array.isArray(body.categories)
+          ? body.categories.map(cat => cat.trim()).filter(cat => cat.length > 0)
+          : [];
+      } else {
+        body.categories = [];
+      }
+  
+      const response = await showModel.createShow(body);
+      res.json(response);
+    } catch (error) {
+      console.error("Error al crear el espectáculo controller:", error);
+  
+      // Si hubo archivo subido, eliminarlo
+      if (flyerPath && fs.existsSync(flyerPath)) {
+        try {
+          fs.unlinkSync(flyerPath);
+          console.log(`Archivo eliminado: ${flyerPath}`);
+        } catch (unlinkErr) {
+          console.error("Error al eliminar el archivo subido:", unlinkErr);
+        }
+      }
+  
+      res.status(500).json({ error: "Error al crear el espectáculo" });
+    }
+  };
 
 const deleteShow = async (req, res) => {
   try {
@@ -106,6 +152,7 @@ const deleteShow = async (req, res) => {
   }
 };
 
+/*
 const updateShow = async (req, res) => {
     try {
       const { show_id } = req.params;
@@ -141,6 +188,52 @@ const updateShow = async (req, res) => {
       res.status(500).json({ error: "Error al actualizar el espectáculo" });
     }
 };
+*/
+const updateShow = async (req, res) => {
+    let flyerPath; // ruta física para eliminar en caso de error
+    try {
+      const { show_id } = req.params;
+      let newData = req.body;
+  
+      // Procesar categorías correctamente
+      if (newData.categories) {
+        if (typeof newData.categories === 'string') {
+          try {
+            newData.categories = JSON.parse(newData.categories);
+          } catch (e) {
+            newData.categories = newData.categories.split(",").map(cat => cat.trim());
+          }
+        }
+        newData.categories = Array.isArray(newData.categories)
+          ? newData.categories.map(cat => cat.trim()).filter(cat => cat.length > 0)
+          : [];
+      }
+  
+      // Si hay nuevo flyer
+      if (req.file) {
+        flyerPath = path.join("public", "uploads", req.file.filename);
+        const imageUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+        newData.image_url = imageUrl;
+      }
+  
+      const response = await showModel.updateShow(show_id, newData);
+      res.json(response);
+    } catch (error) {
+      console.error("Error al actualizar el espectáculo:", error);
+  
+      // Eliminar archivo subido si hubo error
+      if (flyerPath && fs.existsSync(flyerPath)) {
+        try {
+          fs.unlinkSync(flyerPath);
+          console.log(`Archivo eliminado: ${flyerPath}`);
+        } catch (unlinkErr) {
+          console.error("Error al eliminar el archivo subido:", unlinkErr);
+        }
+      }
+  
+      res.status(500).json({ error: "Error al actualizar el espectáculo" });
+    }
+  };
 
 const getShowById = async (req, res) => {
   try {
