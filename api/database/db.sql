@@ -46,3 +46,50 @@ CREATE TABLE lugares (
     seccion_id INT NOT NULL,
     FOREIGN KEY (seccion_id) REFERENCES secciones(id) ON DELETE CASCADE
 );
+
+CREATE TABLE info (
+    id SERIAL PRIMARY KEY,
+    como_llegar TEXT,
+    numeros_utiles TEXT,
+    atractivos TEXT,
+    transporte TEXT
+);
+
+-- Insertar un registro inicial
+INSERT INTO info (id, como_llegar, numeros_utiles, atractivos, transporte)
+VALUES (1, '', '', '', '');
+
+CREATE TABLE colors (
+  id SERIAL PRIMARY KEY,
+  general VARCHAR(7),         -- ej: #000000 o 000000
+  primary_color VARCHAR(7),   -- 'primary' en el body → se guarda aquí
+  background VARCHAR(7)
+);
+
+-- Registro inicial único
+INSERT INTO colors (id, general, primary_color, background)
+VALUES (1, '#000000', '#123sff', '#123sff');
+
+CREATE TABLE branding (
+    id SERIAL PRIMARY KEY,
+    logo_url TEXT,
+    banner_url TEXT,
+    icon_url TEXT
+);
+
+-- Registro único
+INSERT INTO branding (id, logo_url, banner_url, icon_url)
+VALUES (1, '', '', '');
+
+CREATE TABLE settings (
+  id SERIAL PRIMARY KEY,
+  title TEXT,
+  description TEXT,
+  email VARCHAR(255),
+  instagram VARCHAR(255),
+  telephone VARCHAR(50)
+);
+
+-- registro único
+INSERT INTO settings (id, title, description, email, instagram, telephone)
+VALUES (1, '', '', '', '', '');
