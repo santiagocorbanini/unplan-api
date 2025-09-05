@@ -13,6 +13,7 @@ import colorsRoute from "./routes/colors.routes.js";
 import brandingRoute from "./routes/branding.routes.js";
 import generalsRoute from "./routes/generals.routes.js";
 import settingsRoute from "./routes/settings.routes.js";
+import bannerRoute from "./routes/banner.routes.js";
 
 const app = express();
 
@@ -65,6 +66,8 @@ app.use("/branding", brandingRoute);
 app.use("/generals", generalsRoute);
 
 app.use("/settings", settingsRoute);
+
+app.use("/banners", bannerRoute);
 
 const PORT = process.env.PORT || 5000;
 

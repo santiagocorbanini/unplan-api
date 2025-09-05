@@ -93,3 +93,14 @@ CREATE TABLE settings (
 -- registro único
 INSERT INTO settings (id, title, description, email, instagram, telephone)
 VALUES (1, '', '', '', '', '');
+
+CREATE TABLE banners (
+  id SERIAL PRIMARY KEY,
+  image_url VARCHAR(255) NOT NULL,
+  banner_order INTEGER DEFAULT 0,
+  available BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_banners_order ON banners(banner_order);
