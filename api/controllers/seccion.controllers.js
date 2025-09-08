@@ -1,5 +1,7 @@
 import { seccionModel } from "../models/seccion.model.js";
 
+const VALID_PADRES = ["salir", "comer", "dormir", "actividades", "comercios"];
+
 const getAll = async (_, res) => {
   try {
     const secciones = await seccionModel.findAll();
@@ -23,19 +25,57 @@ const getById = async (req, res) => {
 
 const create = async (req, res) => {
   try {
-    const data = req.body;
+    const data = { ...req.body };
+
+    // Validaciones mínimas
+    if (!data.nombre) {
+      return res.status(400).json({ error: "El campo 'nombre' es requerido" });
+    }
+    if (!data.seccion_padre || !VALID_PADRES.includes(data.seccion_padre)) {
+      return res.status(400).json({ error: "Valor de 'seccion_padre' no válido" });
+    }
+
+    // Normalización de seccion_order
+    if (data.seccion_order !== undefined) {
+      const n = Number(data.seccion_order);
+      if (Number.isNaN(n)) {
+        return res.status(400).json({ error: "'seccion_order' debe ser numérico" });
+      }
+      data.seccion_order = n;
+    } else {
+      data.seccion_order = 0; // default
+    }
+
     const newSeccion = await seccionModel.create(data);
     res.status(201).json(newSeccion);
   } catch (error) {
     console.error("Error al crear sección:", error);
-    res.status(500).json({ error: "Error al crear sección" });
+    res.status(500).json({ 
+        error: "Error al actualizar la sección", 
+        detalle: error.message 
+    });
   }
 };
 
 const update = async (req, res) => {
   try {
     const { id } = req.params;
-    const data = req.body;
+    const data = { ...req.body };
+
+    // Validar (solo si vienen)
+    if (data.seccion_padre !== undefined && !VALID_PADRES.includes(data.seccion_padre)) {
+      return res.status(400).json({ error: "Valor de 'seccion_padre' no válido" });
+    }
+
+    if (data.seccion_order !== undefined) {
+      const n = Number(data.seccion_order);
+      if (Number.isNaN(n)) {
+        return res.status(400).json({ error: "'seccion_order' debe ser numérico" });
+      }
+      data.seccion_order = n;
+    }
+
+    // En el modelo usá COALESCE para no pisar con NULL los campos no enviados
     const updatedSeccion = await seccionModel.update(id, data);
     res.json(updatedSeccion);
   } catch (error) {
@@ -64,22 +104,20 @@ const remove = async (req, res) => {
 };
 
 const getByPadre = async (req, res) => {
-    try {
-      const { seccion_padre } = req.params;
-      const validPadres = ['salir', 'comer', 'dormir', 'actividades', 'comercios'];
-  
-      if (!validPadres.includes(seccion_padre)) {
-        return res.status(400).json({ error: "Valor de seccion_padre no válido" });
-      }
-  
-      const secciones = await seccionModel.findByPadre(seccion_padre);
-      res.json(secciones);
-    } catch (error) {
-      console.error("Error al obtener secciones por padre:", error);
-      res.status(500).json({ error: "Error al obtener secciones por padre" });
+  try {
+    const { seccion_padre } = req.params;
+
+    if (!VALID_PADRES.includes(seccion_padre)) {
+      return res.status(400).json({ error: "Valor de seccion_padre no válido" });
     }
-  };
-  
+
+    const secciones = await seccionModel.findByPadre(seccion_padre);
+    res.json(secciones);
+  } catch (error) {
+    console.error("Error al obtener secciones por padre:", error);
+    res.status(500).json({ error: "Error al obtener secciones por padre" });
+  }
+};
 
 export const seccionController = {
   getAll,
@@ -87,5 +125,5 @@ export const seccionController = {
   create,
   update,
   remove,
-  getByPadre
+  getByPadre,
 };

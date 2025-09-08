@@ -41,6 +41,40 @@ const upload = multer({
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     Banner:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *           example: 1
+ *         image_url:
+ *           type: string
+ *           example: "http://localhost:5000/uploads/banners/banner-1712345678901.png"
+ *         banner_order:
+ *           type: integer
+ *           example: 1
+ *         available:
+ *           type: boolean
+ *           example: true
+ *     BannerCreateUpdate:
+ *       type: object
+ *       properties:
+ *         image:
+ *           type: string
+ *           format: binary
+ *           description: Archivo de imagen del banner
+ *         banner_order:
+ *           type: integer
+ *           example: 2
+ *         available:
+ *           type: boolean
+ *           example: false
+ */
+
+/**
+ * @swagger
  * /banners/available:
  *   get:
  *     summary: Obtener todos los banners disponibles (available = true)
@@ -48,6 +82,12 @@ const upload = multer({
  *     responses:
  *       200:
  *         description: Lista de banners activos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Banner'
  */
 router.get("/available", bannerController.getAvailable);
 
@@ -60,6 +100,12 @@ router.get("/available", bannerController.getAvailable);
  *     responses:
  *       200:
  *         description: Lista de banners
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Banner'
  */
 router.get("/", bannerController.getAll);
 
@@ -78,6 +124,10 @@ router.get("/", bannerController.getAll);
  *     responses:
  *       200:
  *         description: Banner encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Banner'
  *       404:
  *         description: Banner no encontrado
  */
@@ -96,20 +146,14 @@ router.get("/:banner_id", bannerController.getById);
  *       content:
  *         multipart/form-data:
  *           schema:
- *             type: object
- *             properties:
- *               image:
- *                 type: string
- *                 format: binary
- *               banner_order:
- *                 type: integer
- *                 example: 1
- *               available:
- *                 type: boolean
- *                 example: true
+ *             $ref: '#/components/schemas/BannerCreateUpdate'
  *     responses:
  *       200:
  *         description: Banner creado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Banner'
  */
 router.post(
   "/",
@@ -120,7 +164,10 @@ router.post(
     const tempPath = req.file ? path.join(bannersDir, `temp-${req.file.filename}`) : null;
     try {
       if (req.file) {
-        await sharp(originalPath).jpeg({ quality: 70 }).png({ quality: 70 }).toFile(tempPath);
+        await sharp(originalPath)
+          .jpeg({ quality: 70 })
+          .png({ quality: 70 })
+          .toFile(tempPath);
         fs.unlinkSync(originalPath);
         fs.renameSync(tempPath, originalPath);
         console.log(`Banner ${req.file.filename} comprimido correctamente`);
@@ -154,20 +201,14 @@ router.post(
  *       content:
  *         multipart/form-data:
  *           schema:
- *             type: object
- *             properties:
- *               image:
- *                 type: string
- *                 format: binary
- *               banner_order:
- *                 type: integer
- *                 example: 2
- *               available:
- *                 type: boolean
- *                 example: false
+ *             $ref: '#/components/schemas/BannerCreateUpdate'
  *     responses:
  *       200:
  *         description: Banner actualizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Banner'
  *       404:
  *         description: Banner no encontrado
  */
@@ -180,7 +221,10 @@ router.put(
     const tempPath = req.file ? path.join(bannersDir, `temp-${req.file.filename}`) : null;
     try {
       if (req.file) {
-        await sharp(originalPath).jpeg({ quality: 70 }).png({ quality: 70 }).toFile(tempPath);
+        await sharp(originalPath)
+          .jpeg({ quality: 70 })
+          .png({ quality: 70 })
+          .toFile(tempPath);
         fs.unlinkSync(originalPath);
         fs.renameSync(tempPath, originalPath);
         console.log(`Banner ${req.file?.filename} comprimido correctamente`);

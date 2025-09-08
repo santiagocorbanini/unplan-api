@@ -13,6 +13,30 @@ const router = Router();
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     Color:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *           example: 1
+ *         general:
+ *           type: string
+ *           description: Color general en formato HEX
+ *           example: "#000000"
+ *         primary:
+ *           type: string
+ *           description: Color primario en formato HEX
+ *           example: "#123sff"
+ *         background:
+ *           type: string
+ *           description: Color de fondo en formato HEX
+ *           example: "#ffffff"
+ */
+
+/**
+ * @swagger
  * /colors:
  *   get:
  *     summary: Obtener la paleta actual de colores
@@ -23,20 +47,7 @@ const router = Router();
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: integer
- *                   example: 1
- *                 general:
- *                   type: string
- *                   example: "#000000"
- *                 primary:
- *                   type: string
- *                   example: "#123sff"
- *                 background:
- *                   type: string
- *                   example: "#ffffff"
+ *               $ref: '#/components/schemas/Color'
  */
 router.get("/", colorsController.getColors);
 
@@ -53,37 +64,14 @@ router.get("/", colorsController.getColors);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               general:
- *                 type: string
- *                 description: Color general (hex)
- *                 example: "#000000"
- *               primary:
- *                 type: string
- *                 description: Color primario (hex)
- *                 example: "#123sff"
- *               background:
- *                 type: string
- *                 description: Color de fondo (hex)
- *                 example: "#f5f5f5"
+ *             $ref: '#/components/schemas/Color'
  *     responses:
  *       200:
  *         description: Paleta actualizada
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: integer
- *                   example: 1
- *                 general:
- *                   type: string
- *                 primary:
- *                   type: string
- *                 background:
- *                   type: string
+ *               $ref: '#/components/schemas/Color'
  */
 router.put("/", verifyToken, colorsController.updateColors);
 

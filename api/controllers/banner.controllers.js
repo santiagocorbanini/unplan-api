@@ -47,7 +47,10 @@ const createBanner = async (req, res) => {
     if (savedPath && fs.existsSync(savedPath)) {
       try { fs.unlinkSync(savedPath); } catch {}
     }
-    res.status(500).json({ error: "Error al crear banner" });
+    res.status(500).json({ 
+        error: "Error al crear el banner", 
+        detalle: error.message 
+    });
   }
 };
 
@@ -77,9 +80,12 @@ const updateBanner = async (req, res) => {
 
     const updated = await bannerModel.updateBanner(id, newData);
     res.json(updated);
-  } catch (e) {
-    console.error("Error al actualizar banner:", e);
-    res.status(500).json({ error: "Error al actualizar banner" });
+  } catch (error) {
+    console.error("Error al actualizar el banner:", error);
+    res.status(500).json({ 
+        error: "Error al actualizar el banner", 
+        detalle: error.message 
+    });
   }
 };
 

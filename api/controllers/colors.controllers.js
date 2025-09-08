@@ -44,9 +44,12 @@ const updateColors = async (req, res) => {
       primary: updated.primary_color,
       background: updated.background,
     });
-  } catch (e) {
-    console.error("[updateColors] Error:", e);
-    res.status(500).json({ error: "Error al actualizar los colores" });
+  } catch (error) {
+    console.error("Error al actualizar los colores:", error);
+    res.status(500).json({ 
+        error: "Error al actualizar los colores", 
+        detalle: error.message 
+    });
   }
 };
 

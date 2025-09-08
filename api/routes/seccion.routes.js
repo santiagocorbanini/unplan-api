@@ -13,6 +13,24 @@ const router = Router();
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     Seccion:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *         nombre:
+ *           type: string
+ *         seccion_padre:
+ *           type: string
+ *           enum: [salir, comer, dormir, actividades, comercios]
+ *         seccion_order:
+ *           type: integer
+ */
+
+/**
+ * @swagger
  * /secciones:
  *   get:
  *     summary: Obtener todas las secciones
@@ -20,6 +38,12 @@ const router = Router();
  *     responses:
  *       200:
  *         description: Lista de secciones
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Seccion'
  */
 router.get("/", seccionController.getAll);
 
@@ -38,6 +62,10 @@ router.get("/", seccionController.getAll);
  *     responses:
  *       200:
  *         description: Sección encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Seccion'
  *       404:
  *         description: Sección no encontrada
  */
@@ -56,18 +84,14 @@ router.get("/:id", seccionController.getById);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               nombre:
- *                 type: string
- *               seccion_padre:
- *                 type: string
- *                 enum: [salir, comer, dormir, actividades, comercios]
- *             required:
- *               - nombre
+ *             $ref: '#/components/schemas/Seccion'
  *     responses:
  *       201:
  *         description: Sección creada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Seccion'
  */
 router.post("/", verifyToken, seccionController.create);
 
@@ -90,16 +114,14 @@ router.post("/", verifyToken, seccionController.create);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               nombre:
- *                 type: string
- *               seccion_padre:
- *                 type: string
- *                 enum: [salir, comer, dormir, actividades, comercios]
+ *             $ref: '#/components/schemas/Seccion'
  *     responses:
  *       200:
  *         description: Sección actualizada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Seccion'
  *       404:
  *         description: Sección no encontrada
  */
@@ -143,6 +165,12 @@ router.delete("/:id", verifyToken, seccionController.remove);
  *     responses:
  *       200:
  *         description: Lista de secciones filtradas por seccion_padre
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Seccion'
  *       400:
  *         description: Valor de seccion_padre no válido
  */

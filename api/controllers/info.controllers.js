@@ -32,8 +32,11 @@ const updateInfo = async (req, res) => {
 
     res.json(updated);
   } catch (error) {
-    console.error("[updateInfo] Error:", error);
-    res.status(500).json({ error: "Error al actualizar la información" });
+    console.error("Error al actualizar la información: ", error);
+    res.status(500).json({ 
+        error: "Error al actualizar la información", 
+        detalle: error.message 
+    });
   }
 };
 

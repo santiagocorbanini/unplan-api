@@ -19,7 +19,10 @@ const getLugarById = async (req, res) => {
     res.json(response);
   } catch (error) {
     console.error("Error al buscar el lugar:", error);
-    res.status(500).json({ error: "Error al buscar el lugar" });
+    res.status(500).json({ 
+        error: "Error al buscar el lugar", 
+        detalle: error.message 
+      });
   }
 };
 
@@ -28,6 +31,16 @@ const createLugar = async (req, res) => {
     try {
       const body = req.body;
       const logo = req.file;
+
+      // normalizamos valores
+      if (body.lugares_order !== undefined) {
+        body.lugares_order = Number(body.lugares_order) || 0;
+      } else {
+        body.lugares_order = 0;
+      }
+      if (body.is_featured !== undefined) {
+        body.is_featured = body.is_featured === true || body.is_featured === "true";
+      }
   
       if (logo) {
         logoPath = path.join("public", "uploads", logo.filename);
@@ -50,7 +63,10 @@ const createLugar = async (req, res) => {
         }
       }
   
-      res.status(500).json({ error: "Error al crear el lugar" });
+      res.status(500).json({ 
+        error: "Error al crear el lugar", 
+        detalle: error.message 
+      });
     }
   };
 
@@ -58,6 +74,14 @@ const updateLugar = async (req, res) => {
   try {
     const { lugar_id } = req.params;
     let newData = req.body;
+
+    // normalizamos valores
+    if (newData.lugares_order !== undefined) {
+        newData.lugares_order = Number(newData.lugares_order) || 0;
+    }
+    if (newData.is_featured !== undefined) {
+        newData.is_featured = newData.is_featured === true || newData.is_featured === "true";
+    }
 
     if (req.file) {
       const logoUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
@@ -68,7 +92,10 @@ const updateLugar = async (req, res) => {
     res.json(response);
   } catch (error) {
     console.error("Error al actualizar el lugar:", error);
-    res.status(500).json({ error: "Error al actualizar el lugar" });
+    res.status(500).json({ 
+        error: "Error al actualizar el lugar", 
+        detalle: error.message 
+    });
   }
 };
 

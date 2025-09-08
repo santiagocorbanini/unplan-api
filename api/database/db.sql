@@ -104,3 +104,6 @@ CREATE TABLE banners (
 );
 
 CREATE INDEX idx_banners_order ON banners(banner_order);
+
+ALTER TABLE secciones ADD COLUMN seccion_order INT DEFAULT 0;
+ALTER TABLE lugares ADD COLUMN lugares_order INT DEFAULT 0;

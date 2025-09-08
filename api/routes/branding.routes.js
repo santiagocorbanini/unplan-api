@@ -20,7 +20,6 @@ const storage = multer.diskStorage({
   },
   filename: function (_req, file, cb) {
     const ext = file.originalname.split(".").pop();
-    // base = logo | banner | icon (según el fieldname)
     let base = "asset";
     if (file.fieldname === "logo") base = "logo";
     else if (file.fieldname === "banner") base = "banner";
@@ -47,6 +46,54 @@ const upload = multer({
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     Branding:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *           example: 1
+ *         logo_url:
+ *           type: string
+ *           example: "http://localhost:5000/uploads/logo-1712345678901.png"
+ *         banner_url:
+ *           type: string
+ *           example: "http://localhost:5000/uploads/banner-1712345678902.jpg"
+ *         icon_url:
+ *           type: string
+ *           example: "http://localhost:5000/uploads/icon-1712345678903.png"
+ *     BrandingUpdateRequest:
+ *       type: object
+ *       properties:
+ *         logo:
+ *           type: string
+ *           format: binary
+ *           description: Archivo de imagen para el logo
+ *         banner:
+ *           type: string
+ *           format: binary
+ *           description: Archivo de imagen para el banner
+ *         icon:
+ *           type: string
+ *           format: binary
+ *           description: Archivo de imagen para el ícono
+ *         logo_url:
+ *           type: string
+ *           description: URL directa si no subís archivo
+ *           example: "https://storage.googleapis.com/bucket/logo.png"
+ *         banner_url:
+ *           type: string
+ *           description: URL directa si no subís archivo
+ *           example: "https://storage.googleapis.com/bucket/banner.jpg"
+ *         icon_url:
+ *           type: string
+ *           description: URL directa si no subís archivo
+ *           example: "https://storage.googleapis.com/bucket/icon.png"
+ */
+
+/**
+ * @swagger
  * /branding:
  *   get:
  *     summary: Obtener logo, banner e icon actuales
@@ -57,20 +104,7 @@ const upload = multer({
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: integer
- *                   example: 1
- *                 logo_url:
- *                   type: string
- *                   example: "http://localhost:5000/uploads/logo-1712345678901.png"
- *                 banner_url:
- *                   type: string
- *                   example: "http://localhost:5000/uploads/banner-1712345678902.jpg"
- *                 icon_url:
- *                   type: string
- *                   example: "http://localhost:5000/uploads/icon-1712345678903.png"
+ *               $ref: '#/components/schemas/Branding'
  */
 router.get("/", brandingController.getBranding);
 
@@ -87,46 +121,14 @@ router.get("/", brandingController.getBranding);
  *       content:
  *         multipart/form-data:
  *           schema:
- *             type: object
- *             properties:
- *               logo:
- *                 type: string
- *                 format: binary
- *               banner:
- *                 type: string
- *                 format: binary
- *               icon:
- *                 type: string
- *                 format: binary
- *               logo_url:
- *                 type: string
- *                 description: Alternativa si ya tenés la URL (sin subir archivo)
- *                 example: "https://storage.googleapis.com/bucket/logo.png"
- *               banner_url:
- *                 type: string
- *                 description: Alternativa si ya tenés la URL (sin subir archivo)
- *                 example: "https://storage.googleapis.com/bucket/banner.jpg"
- *               icon_url:
- *                 type: string
- *                 description: Alternativa si ya tenés la URL (sin subir archivo)
- *                 example: "https://storage.googleapis.com/bucket/icon.png"
+ *             $ref: '#/components/schemas/BrandingUpdateRequest'
  *     responses:
  *       200:
  *         description: Branding actualizado
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: integer
- *                   example: 1
- *                 logo_url:
- *                   type: string
- *                 banner_url:
- *                   type: string
- *                 icon_url:
- *                   type: string
+ *               $ref: '#/components/schemas/Branding'
  */
 router.put(
   "/",

@@ -218,6 +218,10 @@ const createShow = async (body) => {
       return rows[0];
     } catch (error) {
       console.error("Error al crear el espectáculo:", error);
+      res.status(500).json({ 
+        error: "Error al crear el espectáculo", 
+        detalle: error.message 
+      });
       throw error;
     }
 };
@@ -286,6 +290,10 @@ const createShow = async (body) => {
       return rows[0];
     } catch (error) {
       console.error("Error al actualizar el espectáculo:", error);
+      res.status(500).json({ 
+        error: "Error al actualizar el espectáculo", 
+        detalle: error.message 
+      });
       throw error;
     }
   };

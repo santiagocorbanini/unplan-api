@@ -50,9 +50,12 @@ const updateSettings = async (req, res) => {
 
     const updated = await settingsModel.updateSettings(payload);
     res.json(updated);
-  } catch (e) {
-    console.error("[updateSettings] Error:", e);
-    res.status(500).json({ error: "Error al actualizar settings" });
+  } catch (error) {
+    console.error("Error al actualizar settings:", error);
+    res.status(500).json({ 
+        error: "Error al actualizar el lugar", 
+        detalle: error.message 
+    });
   }
 };
 

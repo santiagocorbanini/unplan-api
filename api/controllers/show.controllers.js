@@ -137,7 +137,10 @@ const createShow = async (req, res) => {
         }
       }
   
-      res.status(500).json({ error: "Error al crear el espectáculo" });
+      res.status(500).json({ 
+        error: "Error al crear el espectáculo", 
+        detalle: error.message 
+      });
     }
   };
 
@@ -231,7 +234,10 @@ const updateShow = async (req, res) => {
         }
       }
   
-      res.status(500).json({ error: "Error al actualizar el espectáculo" });
+      res.status(500).json({ 
+        error: "Error al actualizar el espectáculo", 
+        detalle: error.message 
+      });
     }
   };
 

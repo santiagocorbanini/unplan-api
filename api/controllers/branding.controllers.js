@@ -88,15 +88,18 @@ const updateBranding = async (req, res) => {
     }
 
     res.json(updated);
-  } catch (e) {
-    console.error("[updateBranding] Error:", e);
+  } catch (error) {
+    console.error("Error al actualizar branding:", error);
     // Cleanup de archivos recién subidos si hubo error
     for (const p of uploadedPaths) {
       try {
         if (fs.existsSync(p)) fs.unlinkSync(p);
       } catch {}
     }
-    res.status(500).json({ error: "Error al actualizar branding" });
+    res.status(500).json({ 
+        error: "Error al actualizar branding", 
+        detalle: error.message 
+    });
   }
 };
 
