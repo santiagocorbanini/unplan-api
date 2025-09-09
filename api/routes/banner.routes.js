@@ -52,12 +52,25 @@ const upload = multer({
  *         image_url:
  *           type: string
  *           example: "http://localhost:5000/uploads/banners/banner-1712345678901.png"
+ *         banner_name:
+ *           type: string
+ *           example: "Promo Primavera"
+ *         banner_url:
+ *           type: string
+ *           nullable: true
+ *           example: "https://mi-sitio.com/promo"
  *         banner_order:
  *           type: integer
  *           example: 1
  *         available:
  *           type: boolean
  *           example: true
+ *         created_at:
+ *           type: string
+ *           format: date-time
+ *         updated_at:
+ *           type: string
+ *           format: date-time
  *     BannerCreateUpdate:
  *       type: object
  *       properties:
@@ -65,6 +78,15 @@ const upload = multer({
  *           type: string
  *           format: binary
  *           description: Archivo de imagen del banner
+ *         banner_name:
+ *           type: string
+ *           description: Nombre del banner (obligatorio en creación)
+ *           example: "Promo Primavera"
+ *         banner_url:
+ *           type: string
+ *           nullable: true
+ *           description: URL opcional a donde apunta el banner
+ *           example: "https://mi-sitio.com/promo"
  *         banner_order:
  *           type: integer
  *           example: 2

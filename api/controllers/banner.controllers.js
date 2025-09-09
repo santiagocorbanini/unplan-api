@@ -25,11 +25,15 @@ const getById = async (req, res) => {
 const createBanner = async (req, res) => {
   let savedPath;
   try {
-    const { banner_order, available } = req.body;
+    const { banner_order, available, banner_name, banner_url } = req.body;
     const file = req.file;
 
     if (!file) {
       return res.status(400).json({ error: "Se requiere una imagen (campo 'image')." });
+    }
+
+    if (!banner_name || String(banner_name).trim() === "") {
+      return res.status(400).json({ error: "El campo 'banner_name' es obligatorio." });
     }
 
     savedPath = path.join("public", "uploads", "banners", file.filename);
@@ -37,6 +41,8 @@ const createBanner = async (req, res) => {
 
     const created = await bannerModel.createBanner({
       image_url,
+      banner_name: String(banner_name).trim(),
+      banner_url: banner_url ? String(banner_url).trim() : null,
       banner_order: banner_order !== undefined ? Number(banner_order) : undefined,
       available: available !== undefined ? JSON.parse(String(available)) : undefined,
     });
@@ -47,9 +53,9 @@ const createBanner = async (req, res) => {
     if (savedPath && fs.existsSync(savedPath)) {
       try { fs.unlinkSync(savedPath); } catch {}
     }
-    res.status(500).json({ 
-        error: "Error al crear el banner", 
-        detalle: error.message 
+    res.status(500).json({
+      error: "Error al crear el banner",
+      detalle: e.message,
     });
   }
 };
@@ -75,16 +81,22 @@ const updateBanner = async (req, res) => {
       }
     }
 
+    // Normalizaciones
     if (newData.banner_order !== undefined) newData.banner_order = Number(newData.banner_order);
     if (newData.available !== undefined) newData.available = JSON.parse(String(newData.available));
+    if (newData.banner_name !== undefined) newData.banner_name = String(newData.banner_name).trim();
+    if (newData.banner_url !== undefined) {
+      const v = String(newData.banner_url).trim();
+      newData.banner_url = v === "" ? null : v; // permitir vaciar el campo
+    }
 
     const updated = await bannerModel.updateBanner(id, newData);
     res.json(updated);
   } catch (error) {
     console.error("Error al actualizar el banner:", error);
-    res.status(500).json({ 
-        error: "Error al actualizar el banner", 
-        detalle: error.message 
+    res.status(500).json({
+      error: "Error al actualizar el banner",
+      detalle: error.message,
     });
   }
 };
@@ -101,14 +113,14 @@ const deleteBanner = async (req, res) => {
 };
 
 const getAvailable = async (req, res) => {
-    try {
-      const rows = await bannerModel.findAvailable();
-      res.json(rows);
-    } catch (e) {
-      console.error("Error al obtener banners disponibles:", e);
-      res.status(500).json({ error: "Error al obtener banners disponibles" });
-    }
-  };
+  try {
+    const rows = await bannerModel.findAvailable();
+    res.json(rows);
+  } catch (e) {
+    console.error("Error al obtener banners disponibles:", e);
+    res.status(500).json({ error: "Error al obtener banners disponibles" });
+  }
+};
 
 export const bannerController = {
   getAll,
@@ -116,5 +128,5 @@ export const bannerController = {
   createBanner,
   updateBanner,
   deleteBanner,
-  getAvailable
+  getAvailable,
 };

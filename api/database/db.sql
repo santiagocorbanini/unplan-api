@@ -97,6 +97,8 @@ VALUES (1, '', '', '', '', '');
 CREATE TABLE banners (
   id SERIAL PRIMARY KEY,
   image_url VARCHAR(255) NOT NULL,
+  banner_name VARCHAR(255) NOT NULL,
+  banner_url VARCHAR(255),
   banner_order INTEGER DEFAULT 0,
   available BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMP DEFAULT NOW(),
