@@ -11,7 +11,7 @@ const findAll = async () => {
       ORDER BY 
         CASE WHEN l.lugares_order > 0 THEN 0 ELSE 1 END,
         l.lugares_order ASC,
-        l.nombre ASC
+        LOWER(TRIM(l.nombre)) ASC
     `);
     return rows;
   };
@@ -184,7 +184,7 @@ const findBySeccionPadre = async (seccion_padre) => {
         ORDER BY 
           CASE WHEN l.lugares_order > 0 THEN 0 ELSE 1 END,
           l.lugares_order ASC,
-          l.nombre ASC
+          LOWER(TRIM(l.nombre)) ASC
       `,
       [seccion_padre]
     );
@@ -202,7 +202,7 @@ const findBySeccionPadre = async (seccion_padre) => {
         ORDER BY 
           CASE WHEN l.lugares_order > 0 THEN 0 ELSE 1 END,
           l.lugares_order ASC,
-          l.nombre ASC
+          LOWER(TRIM(l.nombre)) ASC
       `,
       [seccionPadre, seccionNombre]
     );

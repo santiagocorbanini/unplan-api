@@ -3,14 +3,38 @@ import fs from "fs";
 import { bannerModel } from "../models/banner.model.js";
 
 const getAll = async (req, res) => {
-  try {
-    const rows = await bannerModel.findAll();
-    res.json(rows);
-  } catch (e) {
-    console.error("Error al obtener banners:", e);
-    res.status(500).json({ error: "Error al obtener banners" });
-  }
-};
+    try {
+      // ?page=1&pageSize=15&search=foo&available=true|false
+      const {
+        page = 1,
+        pageSize = 15,
+        search = null,
+        available = undefined, // si viene, filtra por disponibilidad
+      } = req.query;
+  
+      const parsedPage = parseInt(page) || 1;
+      const parsedPageSize = parseInt(pageSize) || 15;
+      const parsedAvailable =
+        typeof available === "string"
+          ? available.toLowerCase() === "true"
+            ? true
+            : available.toLowerCase() === "false"
+            ? false
+            : undefined
+          : undefined;
+  
+      const response = await bannerModel.findAllPaginated(
+        parsedPage,
+        parsedPageSize,
+        search ? String(search).trim().toLowerCase() : null,
+        parsedAvailable
+      );
+      res.json(response);
+    } catch (e) {
+      console.error("Error al obtener banners:", e);
+      res.status(500).json({ error: "Error al obtener banners" });
+    }
+  };
 
 const getById = async (req, res) => {
   try {
@@ -86,9 +110,13 @@ const updateBanner = async (req, res) => {
     if (newData.available !== undefined) newData.available = JSON.parse(String(newData.available));
     if (newData.banner_name !== undefined) newData.banner_name = String(newData.banner_name).trim();
     if (newData.banner_url !== undefined) {
-      const v = String(newData.banner_url).trim();
-      newData.banner_url = v === "" ? null : v; // permitir vaciar el campo
-    }
+        if (newData.banner_url === null) {
+          newData.banner_url = "";
+        } else if (typeof newData.banner_url === "string") {
+          const v = newData.banner_url.trim();
+          newData.banner_url = v === "" ? "" : v;
+        } 
+      }
 
     const updated = await bannerModel.updateBanner(id, newData);
     res.json(updated);
@@ -113,13 +141,60 @@ const deleteBanner = async (req, res) => {
 };
 
 const getAvailable = async (req, res) => {
-  try {
-    const rows = await bannerModel.findAvailable();
-    res.json(rows);
-  } catch (e) {
-    console.error("Error al obtener banners disponibles:", e);
-    res.status(500).json({ error: "Error al obtener banners disponibles" });
-  }
+    try {
+      // ?page=1&pageSize=15&search=foo
+      const { page = 1, pageSize = 15, search = null } = req.query;
+  
+      const parsedPage = parseInt(page) || 1;
+      const parsedPageSize = parseInt(pageSize) || 15;
+  
+      const response = await bannerModel.findAllPaginated(
+        parsedPage,
+        parsedPageSize,
+        search ? String(search).trim().toLowerCase() : null,
+        true // disponible = true
+      );
+      res.json(response);
+    } catch (e) {
+      console.error("Error al obtener banners disponibles:", e);
+      res.status(500).json({ error: "Error al obtener banners disponibles" });
+    }
+};
+
+const searchBanners = async (req, res) => {
+    try {
+      // permite body o query, usa query por consistencia
+      const {
+        q = "",
+        page = 1,
+        pageSize = 15,
+        available = undefined,
+      } = { ...req.query, ...req.body };
+  
+      const parsedPage = parseInt(page) || 1;
+      const parsedPageSize = parseInt(pageSize) || 15;
+      const parsedAvailable =
+        typeof available === "string"
+          ? available.toLowerCase() === "true"
+            ? true
+            : available.toLowerCase() === "false"
+            ? false
+            : undefined
+          : typeof available === "boolean"
+          ? available
+          : undefined;
+  
+      const response = await bannerModel.searchBanners(
+        String(q).trim().toLowerCase(),
+        parsedPage,
+        parsedPageSize,
+        parsedAvailable
+      );
+      res.json(response);
+    } catch (e) {
+      console.error("Error en búsqueda de banners:", e);
+      res.status(500).json({ error: "Error al buscar banners" });
+    }
 };
 
 export const bannerController = {
@@ -129,4 +204,5 @@ export const bannerController = {
   updateBanner,
   deleteBanner,
   getAvailable,
+  searchBanners,
 };

@@ -6,19 +6,66 @@ import fs from "fs";
 const filenameFromUrl = (url) => url?.split("/").pop();
 const bannerFilePath = (filename) => path.resolve("public/uploads/banners", filename);
 
-// GET all
-const findAll = async () => {
-    const { rows } = await pool.query(`
+// Orden consistente (positivos primero, luego 0/null, después nombre, después id)
+const ORDER_BY = `
+  ORDER BY
+    CASE WHEN COALESCE(banner_order, 0) > 0 THEN 0 ELSE 1 END,
+    banner_order ASC NULLS LAST,
+    LOWER(TRIM(banner_name)) ASC,
+    id ASC
+`;
+
+// ================== PAGINADO GENÉRICO ==================
+const findAllPaginated = async (page = 1, pageSize = 15, search = null, available = undefined) => {
+    const offset = (page - 1) * pageSize;
+  
+    const values = [];
+    const where = [];
+  
+    if (typeof available === "boolean") {
+      values.push(available);
+      where.push(`available = $${values.length}`);
+    }
+  
+    if (search) {
+      values.push(`%${search}%`);
+      values.push(`%${search}%`);
+      where.push(`(LOWER(banner_name) LIKE $${values.length - 1} OR LOWER(COALESCE(banner_url,'')) LIKE $${values.length})`);
+    }
+  
+    const whereSQL = where.length ? `WHERE ${where.join(" AND ")}` : "";
+  
+    // DATA
+    const dataSql = `
       SELECT id, image_url, banner_name, banner_url, banner_order, available, created_at, updated_at
       FROM banners
-      ORDER BY
-        CASE WHEN COALESCE(banner_order, 0) > 0 THEN 0 ELSE 1 END,
-        banner_order ASC NULLS LAST,
-        banner_name ASC,
-        id ASC
-    `);
-    return rows;
+      ${whereSQL}
+      ${ORDER_BY}
+      LIMIT $${values.length + 1} OFFSET $${values.length + 2}
+    `;
+    const dataVals = [...values, pageSize, offset];
+    const { rows } = await pool.query(dataSql, dataVals);
+  
+    // COUNT
+    const countSql = `SELECT COUNT(*) FROM banners ${whereSQL}`;
+    const { rows: countRows } = await pool.query(countSql, values);
+    const total = parseInt(countRows[0].count, 10) || 0;
+  
+    return {
+      data: rows,
+      total,
+      totalPages: Math.ceil(total / pageSize),
+      page,
+      pageSize,
+    };
   };
+
+// ================== BÚSQUEDA CON PAGINADO ==================
+const searchBanners = async (q = "", page = 1, pageSize = 15, available = undefined) => {
+    const term = q?.trim().toLowerCase();
+    // reusa findAllPaginated armando filtros de la misma forma
+    return findAllPaginated(page, pageSize, term || null, available);
+  };  
 
 // GET by id
 const getById = async (id) => {
@@ -44,6 +91,7 @@ const createBanner = async ({ image_url, banner_name, banner_url = null, banner_
 
 // UPDATE
 const updateBanner = async (id, { image_url, banner_name, banner_url, banner_order, available }) => {
+    console.log("Actualizando banner", id, { image_url, banner_name, banner_url, banner_order, available });
   const { rows } = await pool.query(
     `UPDATE banners SET
        banner_name  = COALESCE($2, banner_name),
@@ -103,7 +151,8 @@ const findAvailable = async () => {
 };
 
 export const bannerModel = {
-  findAll,
+  findAllPaginated,
+  searchBanners,
   getById,
   createBanner,
   updateBanner,

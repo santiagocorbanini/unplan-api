@@ -8,7 +8,7 @@ const findAll = async () => {
     ORDER BY 
       CASE WHEN seccion_order > 0 THEN 0 ELSE 1 END,
       seccion_order ASC,
-      nombre ASC
+      LOWER(TRIM(nombre)) ASC
   `);
   return rows;
 };
@@ -70,7 +70,7 @@ const findByPadre = async (seccion_padre) => {
         ORDER BY 
           CASE WHEN seccion_order > 0 THEN 0 ELSE 1 END,
           seccion_order ASC,
-          nombre ASC
+          LOWER(TRIM(nombre)) ASC
       `,
       [seccion_padre]
     );

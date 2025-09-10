@@ -46,31 +46,25 @@ const upload = multer({
  *     Banner:
  *       type: object
  *       properties:
- *         id:
- *           type: integer
- *           example: 1
- *         image_url:
- *           type: string
- *           example: "http://localhost:5000/uploads/banners/banner-1712345678901.png"
- *         banner_name:
- *           type: string
- *           example: "Promo Primavera"
- *         banner_url:
- *           type: string
- *           nullable: true
- *           example: "https://mi-sitio.com/promo"
- *         banner_order:
- *           type: integer
- *           example: 1
- *         available:
- *           type: boolean
- *           example: true
- *         created_at:
- *           type: string
- *           format: date-time
- *         updated_at:
- *           type: string
- *           format: date-time
+ *         id: { type: integer, example: 1 }
+ *         image_url: { type: string, example: "http://localhost:5000/uploads/banners/banner-1712345678901.png" }
+ *         banner_name: { type: string, example: "Promo Primavera" }
+ *         banner_url: { type: string, nullable: true, example: "https://mi-sitio.com/promo" }
+ *         banner_order: { type: integer, example: 1 }
+ *         available: { type: boolean, example: true }
+ *         created_at: { type: string, format: date-time }
+ *         updated_at: { type: string, format: date-time }
+ *     PaginatedBannersResponse:
+ *       type: object
+ *       properties:
+ *         data:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Banner'
+ *         total: { type: integer, example: 123 }
+ *         totalPages: { type: integer, example: 9 }
+ *         page: { type: integer, example: 2 }
+ *         pageSize: { type: integer, example: 15 }
  *     BannerCreateUpdate:
  *       type: object
  *       properties:
@@ -87,49 +81,98 @@ const upload = multer({
  *           nullable: true
  *           description: URL opcional a donde apunta el banner
  *           example: "https://mi-sitio.com/promo"
- *         banner_order:
- *           type: integer
- *           example: 2
- *         available:
- *           type: boolean
- *           example: false
+ *         banner_order: { type: integer, example: 2 }
+ *         available: { type: boolean, example: false }
  */
-
-/**
- * @swagger
- * /banners/available:
- *   get:
- *     summary: Obtener todos los banners disponibles (available = true)
- *     tags: [Banners]
- *     responses:
- *       200:
- *         description: Lista de banners activos
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Banner'
- */
-router.get("/available", bannerController.getAvailable);
 
 /**
  * @swagger
  * /banners:
  *   get:
- *     summary: Obtener todos los banners
+ *     summary: Obtener banners con paginación y filtro
  *     tags: [Banners]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: pageSize
+ *         schema: { type: integer, default: 15 }
+ *       - in: query
+ *         name: search
+ *         schema: { type: string }
+ *         description: Buscar por nombre o URL del banner (case-insensitive)
+ *       - in: query
+ *         name: available
+ *         schema: { type: boolean }
+ *         description: Filtrar por disponibilidad (true/false)
  *     responses:
  *       200:
- *         description: Lista de banners
+ *         description: Lista paginada de banners
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Banner'
+ *               $ref: '#/components/schemas/PaginatedBannersResponse'
  */
 router.get("/", bannerController.getAll);
+
+/**
+ * @swagger
+ * /banners/available:
+ *   get:
+ *     summary: Obtener banners disponibles (available = true) con paginación
+ *     tags: [Banners]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: pageSize
+ *         schema: { type: integer, default: 15 }
+ *       - in: query
+ *         name: search
+ *         schema: { type: string }
+ *         description: Buscar por nombre o URL (case-insensitive)
+ *     responses:
+ *       200:
+ *         description: Lista paginada de banners activos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/PaginatedBannersResponse'
+ */
+router.get("/available", bannerController.getAvailable);
+
+/**
+ * @swagger
+ * /banners/search:
+ *   get:
+ *     summary: Buscar banners por nombre/URL con paginación
+ *     tags: [Banners]
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         schema: { type: string }
+ *         description: Término de búsqueda (case-insensitive)
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: pageSize
+ *         schema: { type: integer, default: 15 }
+ *       - in: query
+ *         name: available
+ *         schema: { type: boolean }
+ *         description: Filtrar por disponibilidad
+ *     responses:
+ *       200:
+ *         description: Resultados paginados de búsqueda
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/PaginatedBannersResponse'
+ */
+router.get("/search", bannerController.searchBanners);
 
 /**
  * @swagger
@@ -141,8 +184,7 @@ router.get("/", bannerController.getAll);
  *       - in: path
  *         name: banner_id
  *         required: true
- *         schema:
- *           type: integer
+ *         schema: { type: integer }
  *     responses:
  *       200:
  *         description: Banner encontrado
@@ -216,8 +258,7 @@ router.post(
  *       - in: path
  *         name: banner_id
  *         required: true
- *         schema:
- *           type: integer
+ *         schema: { type: integer }
  *     requestBody:
  *       required: false
  *       content:
@@ -273,8 +314,7 @@ router.put(
  *       - in: path
  *         name: banner_id
  *         required: true
- *         schema:
- *           type: integer
+ *         schema: { type: integer }
  *     responses:
  *       200:
  *         description: Banner eliminado
